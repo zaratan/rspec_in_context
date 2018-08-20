@@ -58,7 +58,7 @@ end
 
 ##### Outside a Rspec block
 
-Outside of a test you have to use `Rspec.define_context`.
+Outside of a test you have to use `RSpec.define_context`.
 
 
 ### Use the context
