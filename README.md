@@ -1,6 +1,7 @@
 # RspecInContext
 
 [![Gem Version](https://badge.fury.io/rb/rspec_in_context.svg)](https://badge.fury.io/rb/rspec_in_context)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7ee82740e840412b864574851aa44f16)](https://www.codacy.com/project/denis-pasin/rspec_in_context/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=denispasin/rspec_in_context&amp;utm_campaign=Badge_Grade_Dashboard)
 
 
 This gem is here to help you write better shared_examples in Rspec.
