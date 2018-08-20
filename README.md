@@ -1,5 +1,8 @@
 # RspecInContext
 
+[![Gem Version](https://badge.fury.io/rb/rspec_in_context.svg)](https://badge.fury.io/rb/rspec_in_context)
+
+
 This gem is here to help you write better shared_examples in Rspec.
 
 Ever been bothered by the fact that they don't really behave like methods and that you can't pass it a block ? There you go: `rspec_in_context`
