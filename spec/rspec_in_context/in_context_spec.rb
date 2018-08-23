@@ -61,7 +61,7 @@ describe RspecInContext do
     end
   end
 
-  context "in context calls" do
+  describe "in_context calls" do
     in_context "outside in_context"
     in_context "inside in_context"
     in_context "with_symbol"
