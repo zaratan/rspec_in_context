@@ -86,6 +86,7 @@ end
 ### Things to know
 
 * You can chose exactly where your inside test will be used:
+
 By using `execute_tests` in your define context, the test passed when you *use* the context will be executed here
 
 ```ruby
@@ -109,8 +110,10 @@ in_context :context_name do
 end
 ```
 
-* You can add variable instantiation relative to your test where you exactly want
-It's an alias of `execute_tests` so you can't use both. But it let you describe what the block will do better.
+* You can add variable instantiation relative to your test where you exactly want:
+
+`instanciate_context` is an alias of `execute_tests` so you can't use both.
+But it let you describe what the block will do better.
 
 * You can use variable in the in_context definition
 
