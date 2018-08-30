@@ -109,6 +109,9 @@ in_context :context_name do
 end
 ```
 
+* You can add variable instantiation relative to your test where you exactly want
+It's an alias of `execute_tests` so you can't use both. But it let you describe what the block will do better.
+
 * You can use variable in the in_context definition
 
 ```ruby
