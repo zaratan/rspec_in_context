@@ -20,34 +20,34 @@ describe RspecInContext do
   end
 
   define_context "with test block" do
-    it "doesn't find poire" do
-      expect(defined?(poire)).to be_falsy
+    it "doesn't find unexistant variable" do
+      expect(defined?(new_var)).to be_falsy
     end
 
-    context "with poire" do
-      let(:poire) { true }
+    context "with new variable" do
+      let(:new_var) { true }
 
       execute_tests
     end
   end
 
   define_context "with instanciate block" do
-    it "doesn't find poire" do
-      expect(defined?(poire)).to be_falsy
+    it "doesn't find unexistant variable" do
+      expect(defined?(new_var)).to be_falsy
     end
 
-    context "with poire" do
+    context "with variable instanciated" do
       instanciate_context
 
-      it "works with abricot" do
-        expect(abricot).to eq(:poire)
+      it "works with another variable" do
+        expect(another_var).to eq(:value)
       end
     end
   end
 
   define_context "with argument" do |name|
     it "doesn't find #{name}" do
-      expect(defined?(poire)).to be_falsy
+      expect(defined?(outside_var)).to be_falsy
     end
 
     context "with #{name}" do
@@ -58,11 +58,11 @@ describe RspecInContext do
   end
 
   define_context :nested do
-    context "with poire" do
-      let(:poire) { true }
+    context "with inside_var defined" do
+      let(:inside_var) { true }
 
       it "works in nested in_context" do
-        expect(pomme).to eq(poire)
+        expect(outside_var).to eq(inside_var)
       end
     end
   end
@@ -81,18 +81,18 @@ describe RspecInContext do
     in_context "with_symbol"
 
     in_context "with test block" do
-      it "works with poire" do
-        expect(poire).to be_truthy
+      it "works with new_var" do
+        expect(new_var).to be_truthy
       end
     end
 
     in_context "with instanciate block" do
-      let(:abricot) { :poire }
+      let(:another_var) { :value }
     end
 
-    in_context "with argument", :pomme do
-      it "works with pomme" do
-        expect(pomme).to be_truthy
+    in_context "with argument", :outside_var do
+      it "works with outside_var" do
+        expect(outside_var).to be_truthy
       end
 
       in_context :nested
