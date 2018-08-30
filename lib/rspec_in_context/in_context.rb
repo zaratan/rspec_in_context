@@ -33,6 +33,7 @@ module RspecInContext
       def execute_tests
         instance_exec(&Thread.current[:test_block]) if Thread.current[:test_block]
       end
+      alias_method :instanciate_context, :execute_tests
 
       def define_context(context_name, &block)
         InContext.add_context(context_name, &block)

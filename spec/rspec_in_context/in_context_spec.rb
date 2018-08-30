@@ -19,7 +19,7 @@ describe RspecInContext do
     end
   end
 
-  define_context "with block" do
+  define_context "with test block" do
     it "doesn't find poire" do
       expect(defined?(poire)).to be_falsy
     end
@@ -28,6 +28,20 @@ describe RspecInContext do
       let(:poire) { true }
 
       execute_tests
+    end
+  end
+
+  define_context "with instanciate block" do
+    it "doesn't find poire" do
+      expect(defined?(poire)).to be_falsy
+    end
+
+    context "with poire" do
+      instanciate_context
+
+      it "works with abricot" do
+        expect(abricot).to eq(:poire)
+      end
     end
   end
 
@@ -66,10 +80,14 @@ describe RspecInContext do
     in_context "inside in_context"
     in_context "with_symbol"
 
-    in_context "with block" do
+    in_context "with test block" do
       it "works with poire" do
         expect(poire).to be_truthy
       end
+    end
+
+    in_context "with instanciate block" do
+      let(:abricot) { :poire }
     end
 
     in_context "with argument", :pomme do
