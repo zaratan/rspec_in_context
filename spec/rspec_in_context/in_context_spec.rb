@@ -6,7 +6,7 @@ RSpec.define_context "outside in_context" do
   end
 end
 
-describe RspecInContext do
+describe RspecInContext::InContext do
   define_context "inside in_context" do
     it "works for inside context" do
       expect(true).to be_truthy
