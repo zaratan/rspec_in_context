@@ -34,7 +34,11 @@ module RspecInContext
     module ClassMethods
       def in_context(context_name, *args, &block)
         Thread.current[:test_block] = block
-        instance_exec(*args, &InContext.find_context(context_name).block)
+        instance_exec do
+          context(context_name) do
+            instance_exec(*args, &InContext.find_context(context_name).block)
+          end
+        end
       end
 
       def execute_tests
