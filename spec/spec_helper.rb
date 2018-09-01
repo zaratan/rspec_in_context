@@ -11,6 +11,7 @@ SimpleCov.at_exit do
 end
 
 SimpleCov.start do
+  load_profile "test_frameworks"
   add_filter do |source_file|
     source_file.lines.count < 5
   end
@@ -104,14 +105,16 @@ RSpec.configure do |config|
   #   # Print the 10 slowest examples and example groups at the
   #   # end of the spec run, to help surface which specs are running
   #   # particularly slow.
-  config.profile_examples = 10
+  # config.profile_examples = 10
   #
   #   # Run specs in random order to surface order dependencies. If you find an
   #   # order dependency and want to debug it, you can fix the order by providing
   #   # the seed, which is printed after each run.
   #   #     --seed 1234
-  config.order = :random
-  #
+
+  # IMPORTANT: WE ARE ORDER DEPENDANT BECAUSE CONTEXT ISOLATION TESTS ARE HACKY
+  # config.order = :random
+
   #   # Seed global randomization in this process using the `--seed` CLI option.
   #   # Setting this allows you to use `--seed` to deterministically reproduce
   #   # test failures related to randomization by passing the same `--seed` value

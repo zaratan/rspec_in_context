@@ -8,8 +8,6 @@ This gem is here to help you write better shared_examples in Rspec.
 
 Ever been bothered by the fact that they don't really behave like methods and that you can't pass it a block ? There you go: `rspec_in_context`
 
-**NOTE**: This is an alpha version. For now context are globally scoped.
-
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -49,7 +47,7 @@ end
 You can define in_context block that are reusable almost anywhere.
 They completely look like normal Rspec.
 
-##### Inside a Rspec block
+##### Inside a Rspec block (scoped)
 
 ```ruby
 # A in_context can be named with a symbol or a string
@@ -60,18 +58,22 @@ define_context :context_name do
 end
 ```
 
-##### Outside a Rspec block
+Those in_context will be scoped to their current `describe`/`context` block.
 
-Outside of a test you have to use `RSpec.define_context`.
+##### Outside a Rspec block (globally)
+
+Outside of a test you have to use `RSpec.define_context`. Those in_context will be defined globally in your tests.
 
 
 ### Use the context
 
-Anywhere in your test description, use a `in_context` block to use a predefined in_context. **They don't need to be in the same file.** Example:
+Anywhere in your test description, use a `in_context` block to use a predefined in_context.
+
+**Important**: in_context are scoped to their current `describe`/`context` block. If you need globally defined context see `RSpec.define_context`
 
 ```ruby
 # A in_context can be named with a symbol or a string
-define_context :context_name do
+RSpec.define_context :context_name do
   it 'works' do
     expect(true).to be_truthy
   end
