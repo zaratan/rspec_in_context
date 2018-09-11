@@ -34,7 +34,7 @@ module RspecInContext
       end
 
       def remove_context(current_class)
-        contexts.each do |_, namespaced_contexts|
+        contexts.each_value do |namespaced_contexts|
           namespaced_contexts.delete_if{ |_, context| context.owner == current_class }
         end
       end
