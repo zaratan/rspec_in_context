@@ -87,8 +87,9 @@ end
 
 ### Things to know
 
-* You can chose exactly where your inside test will be used:
+#### Inside block execution
 
+* You can chose exactly where your inside test will be used:
 By using `execute_tests` in your define context, the test passed when you *use* the context will be executed here
 
 ```ruby
@@ -117,6 +118,8 @@ end
 `instanciate_context` is an alias of `execute_tests` so you can't use both.
 But it let you describe what the block will do better.
 
+#### Variable usage
+
 * You can use variable in the in_context definition
 
 ```ruby
@@ -139,6 +142,8 @@ in_context :context_name, :poire do
   end
 end
 ```
+
+#### Scoping
 
 * In_contexts can be scope inside one another
 
@@ -173,6 +178,45 @@ in_context :context_name, :poire do
 
   in_context "second in_context" # => will work
 end
+```
+
+* in_context are bound to their current scope
+
+#### Namespacing
+
+* You can add a namespace to a in_context definition
+
+```ruby
+define_context "this is a namespaced context", namespace: "namespace name"
+```
+Or
+```ruby
+define_context "this is a namespaced context", ns: "namespace name"
+```
+Or
+```ruby
+RSpec.define_context "this is a namespaced context", ns: "namespace name"
+```
+
+* When you want to use a namespaced in_context, you have two choice:
+
+Ignore any namespace and it will try to find a corresponding in_context in any_namespace (the ones defined without namespace have the priority);
+```ruby
+define_context "namespaced context", ns: "namespace name" do
+  [...]
+end
+
+in_context "namespaced context"
+```
+
+Pass a namespace and it will look only in this context.
+```ruby
+define_context "namespaced context", ns: "namespace name" do
+  [...]
+end
+
+in_context "namespaced context", namespace: "namespace name"
+in_context "namespaced context", ns: "namespace name"
 ```
 
 ## Development

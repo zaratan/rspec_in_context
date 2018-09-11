@@ -6,6 +6,18 @@ RSpec.define_context "outside in_context" do
   end
 end
 
+RSpec.define_context "outside namespaced", namespace: 'outside' do
+  it "works" do
+    expect(true).to be_truthy
+  end
+end
+
+RSpec.define_context "outside short-namespaced", ns: 'outside' do
+  it "works" do
+    expect(true).to be_truthy
+  end
+end
+
 describe RspecInContext::InContext do
   define_context "inside in_context" do
     it "works for inside context" do
@@ -99,5 +111,49 @@ describe RspecInContext::InContext do
     end
 
     in_context "in_context in in_context"
+  end
+
+  describe "namespacing" do
+    in_context "outside namespaced"
+    in_context "outside namespaced", namespace: :outside
+    in_context "outside namespaced", ns: "outside"
+    in_context "outside short-namespaced", ns: :outside
+    test_inexisting_context "outside namespaced", namespace: :not_exist
+
+    define_context "inside namespaced", namespace: :inside do
+      it "works" do
+        expect(true).to be_truthy
+      end
+    end
+
+    define_context :inside, ns: :inside do
+      it "works" do
+        expect(true).to be_truthy
+      end
+    end
+
+    define_context "inside namespaced", ns: :inside_2 do
+      it "works" do
+        expect(true).to be_truthy
+      end
+    end
+
+    in_context "inside namespaced"
+    in_context "inside namespaced", namespace: :inside
+    in_context :inside, ns: :inside
+    in_context "inside namespaced", ns: :inside
+    in_context "inside namespaced", ns: :inside_2
+    test_inexisting_context "inside namespaced", namespace: :not_exist
+    describe "context isolation still work" do
+      define_context "isolated namespaced", ns: :isolated do
+        it "works" do
+          expect(true).to be_truthy
+        end
+      end
+      in_context "isolated namespaced", ns: :isolated
+      in_context :inside, ns: :inside
+    end
+    test_inexisting_context "isolated namespaced"
+    test_inexisting_context "isolated namespaced", ns: :isolated
   end
 end
