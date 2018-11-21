@@ -38,4 +38,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec_junit_formatter", "~> 0.4.1"
   spec.add_development_dependency "rubocop", "> 0.58"
   spec.add_development_dependency "simplecov", "> 0.16"
+  spec.add_development_dependency "yard", "~> 0.9"
 end
