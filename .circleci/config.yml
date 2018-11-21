@@ -78,6 +78,8 @@ jobs:
       - run:
           name: Publish new version of the gem
           command: |
+            git config --global user.email denis.pasin+circleci@gmail.com && \
+            git config --global user.name "Denis <CircleCI> Pasin" && \
             rake release
 workflows:
   version: 2
