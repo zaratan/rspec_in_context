@@ -16,6 +16,7 @@ module RspecInContext
 
       def add_context(context_name, owner = nil, namespace = nil, &block)
         namespace ||= GLOBAL_CONTEXT
+        warn("Overriding an existing context: #{context_name}@#{namespace}") if contexts[namespace][context_name]
         contexts[namespace][context_name] = Context.new(block, owner, context_name, namespace)
       end
 
