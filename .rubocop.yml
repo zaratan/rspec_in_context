@@ -15,6 +15,7 @@ Metrics/BlockLength:
     - 'spec/**/*.rb'
     - 'Guardfile'
     - 'vendor/bundle'
+    - '*.gemspec'
 
 Naming/UncommunicativeMethodParamName:
   Enabled: false

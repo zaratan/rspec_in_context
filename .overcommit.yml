@@ -2,6 +2,10 @@ PreCommit:
   RuboCop:
     enabled: true
     command: ['bundle', 'exec', 'rubocop'] # Invoke within Bundler context
+  BundleOutdated:
+    enabled: true
+  BundleAudit:
+    enabled: true
 PrePush:
   RSpec:
     enabled: true
