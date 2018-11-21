@@ -87,6 +87,18 @@ describe RspecInContext::InContext do
     end
   end
 
+  describe "overriding an existing context" do
+    before do
+      expect(RspecInContext::InContext).to receive(:warn)
+    end
+
+    RSpec.define_context(:oustide_context) {}
+
+    it "warns" do
+      RSpec.define_context(:oustide_context)
+    end
+  end
+
   describe "in_context calls" do
     in_context "outside in_context"
     in_context "inside in_context"
