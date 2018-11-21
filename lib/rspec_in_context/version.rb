@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
 module RspecInContext
-  VERSION = "0.3.2"
+  # Version of the gem
+  VERSION = "0.4.0"
 end
