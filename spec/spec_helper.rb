@@ -2,6 +2,9 @@
 
 require 'simplecov'
 require 'faker'
+require 'codacy-coverage'
+
+Codacy::Reporter.start
 
 SimpleCov.at_exit do
   SimpleCov.result.format!
