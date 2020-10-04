@@ -4,9 +4,6 @@ on:
   push:
     branches: 
       - main
-  pull_request:
-    branches: 
-      - main
 
 jobs:
   test-2_5:
@@ -54,3 +51,16 @@ jobs:
       run: bundle exec rubocop
     - name: Run tests
       run: bundle exec rspec
+  release:
+    needs: [test-2_5, test-2_6, test-2_7]
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+    - name: Install dependencies
+      run: bundle install
+
