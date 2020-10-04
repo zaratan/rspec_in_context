@@ -7,7 +7,7 @@ on:
     branches: [ $default-branch ]
 
 jobs:
-  test-2_5_8:
+  test-2_5:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,6 +16,36 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: 2.5
+    - name: Install dependencies
+      run: bundle install
+    - name: Run linter
+      run: bundle exec rubocop
+    - name: Run tests
+      run: bundle exec rspec
+  test-2_6:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.6
+    - name: Install dependencies
+      run: bundle install
+    - name: Run linter
+      run: bundle exec rubocop
+    - name: Run tests
+      run: bundle exec rspec
+  test-2_7:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
     - name: Install dependencies
       run: bundle install
     - name: Run linter
