@@ -63,4 +63,9 @@ jobs:
         ruby-version: 2.7
     - name: Install dependencies
       run: bundle install
-
+    - name: Prepare credentials
+      env:
+        TEST_DENIS: ${{ secrets.TEST_DENIS }}
+      run: "mkdir ~/.gem && echo -e \"---\\r\\n:rubygems_api_key: $TEST_DENIS\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials"
+    - name: check credentials
+      run: cat ~/.gem/credentials
