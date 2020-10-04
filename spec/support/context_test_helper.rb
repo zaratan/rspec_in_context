@@ -6,19 +6,17 @@ module ContextTestHelper
     namespace ||= ns
     description ||= "using in_context defined in a another context"
     instance_exec do
-      begin
-        in_context context_name, ns: namespace
-        # If we get there the test has failed T_T
-        describe description do
-          it "is well scoped" do
-            expect(false).to be_truthy
-          end
+      in_context context_name, ns: namespace
+      # If we get there the test has failed T_T
+      describe description do
+        it "is well scoped" do
+          expect(false).to be_truthy
         end
-      rescue RspecInContext::NoContextFound
-        describe description do
-          it "is well scoped" do
-            expect(true).to be_truthy
-          end
+      end
+    rescue RspecInContext::NoContextFound
+      describe description do
+        it "is well scoped" do
+          expect(true).to be_truthy
         end
       end
     end

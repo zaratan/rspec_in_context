@@ -1,13 +1,14 @@
 inherit_from:
   - http://relaxed.ruby.style/rubocop.yml
 
+require: 
+  - rubocop-performance
+
 AllCops:
+  NewCops: enable
   DisplayStyleGuide: true
   DisplayCopNames: true
   Exclude:
-    - 'db/schema.rb'
-    - 'vendor/**/*'
-    - 'config/environments/*.rb'
     - 'bin/*'
 
 Metrics/BlockLength:
@@ -17,5 +18,46 @@ Metrics/BlockLength:
     - 'vendor/bundle'
     - '*.gemspec'
 
-Naming/UncommunicativeMethodParamName:
+Naming/MethodParameterName:
   Enabled: false
+
+Layout/DotPosition:
+  Enabled: true
+  EnforcedStyle: trailing
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: true
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: true
+  EnforcedStyleForMultiline: comma
+
+Layout/MultilineArrayLineBreaks:
+  Enabled: true
+
+Layout/MultilineHashKeyLineBreaks:
+  Enabled: true
+
+Layout/MultilineMethodArgumentLineBreaks:
+  Enabled: true
+
+Layout/FirstArrayElementLineBreak:
+  Enabled: true
+
+Layout/FirstHashElementLineBreak:
+  Enabled: true
+
+Layout/FirstMethodArgumentLineBreak:
+  Enabled: true
+
+Layout/MultilineAssignmentLayout:
+  Enabled: true
+
+Layout/LineLength:
+  Enabled: true
+  Max: 120
+  AutoCorrect: true
+  Exclude:
+    - Gemfile
+    - Guardfile

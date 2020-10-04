@@ -1,7 +1,7 @@
 PreCommit:
   RuboCop:
     enabled: true
-    command: ['bundle', 'exec', 'rubocop'] # Invoke within Bundler context
+    command: ['bundle', 'exec', 'rubocop', '-P'] # Invoke within Bundler context
   BundleOutdated:
     enabled: true
   BundleAudit:
