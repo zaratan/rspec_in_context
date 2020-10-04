@@ -2,9 +2,11 @@ name: Test and Release
 
 on:
   push:
-    branches: [ $default-branch ]
+    branches: 
+      - main
   pull_request:
-    branches: [ $default-branch ]
+    branches: 
+      - main
 
 jobs:
   test-2_5:
