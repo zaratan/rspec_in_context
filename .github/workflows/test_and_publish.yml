@@ -65,7 +65,7 @@ jobs:
       run: bundle install
     - name: Prepare credentials
       env:
-        TEST_DENIS: ${{ secrets.TEST_DENIS }}
-      run: "echo -e \"---\\r\\n:rubygems_api_key: $TEST_DENIS\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials"
-    - name: check credentials
-      run: cat ~/.gem/credentials
+        RUBYGEM_KEY: ${{ secrets.RUBYGEM_KEY }}
+      run: "echo -e \"---\\r\\n:rubygems_api_key: $RUBYGEM_KEY\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials"
+    - name: Publish
+      run: rake release
