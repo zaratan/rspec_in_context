@@ -66,6 +66,6 @@ jobs:
     - name: Prepare credentials
       env:
         TEST_DENIS: ${{ secrets.TEST_DENIS }}
-      run: "mkdir ~/.gem && echo -e \"---\\r\\n:rubygems_api_key: $TEST_DENIS\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials"
+      run: "echo -e \"---\\r\\n:rubygems_api_key: $TEST_DENIS\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials"
     - name: check credentials
       run: cat ~/.gem/credentials
