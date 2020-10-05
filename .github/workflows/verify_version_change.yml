@@ -1,0 +1,21 @@
+name: Verify version change
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  version_change:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fetch main branch
+        run: git fetch origin main:main
+      - name: Verify if there's a change in version
+        run: "git diff main lib/rspec_in_context/version.rb | grep VERSION"
+      - name: Print new version
+        run: 'git diff main lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?"'
+      - name: Verify if higher version
+        run: '[[ $(git diff main lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?") > $(git diff main lib/rspec_in_context/version.rb | grep -E "^-.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?") ]]'

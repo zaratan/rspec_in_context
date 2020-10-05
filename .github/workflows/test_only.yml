@@ -1,0 +1,53 @@
+name: Tests
+
+on:
+  push:
+    branches-ignore: 
+      - main
+
+jobs:
+  test-2_5:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.5
+    - name: Install dependencies
+      run: bundle install
+    - name: Run linter
+      run: bundle exec rubocop
+    - name: Run tests
+      run: bundle exec rspec
+  test-2_6:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.6
+    - name: Install dependencies
+      run: bundle install
+    - name: Run linter
+      run: bundle exec rubocop
+    - name: Run tests
+      run: bundle exec rspec
+  test-2_7:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7
+    - name: Install dependencies
+      run: bundle install
+    - name: Run linter
+      run: bundle exec rubocop
+    - name: Run tests
+      run: bundle exec rspec
