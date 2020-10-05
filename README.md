@@ -1,8 +1,8 @@
 # RspecInContext
 
 [![Gem Version](https://badge.fury.io/rb/rspec_in_context.svg)](https://badge.fury.io/rb/rspec_in_context)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/7ee82740e840412b864574851aa44f16)](https://www.codacy.com/project/denis-pasin/rspec_in_context/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=denispasin/rspec_in_context&amp;utm_campaign=Badge_Grade_Dashboard)
-
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6490834b08664dc898d0107c74a78357)](https://www.codacy.com/gh/zaratan/rspec_in_context/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=zaratan/rspec_in_context&amp;utm_campaign=Badge_Grade)
+![Test and Release badge](https://github.com/zaratan/rspec_in_context/workflows/Test%20and%20Release/badge.svg)
 
 This gem is here to help you write better shared_examples in Rspec.
 
