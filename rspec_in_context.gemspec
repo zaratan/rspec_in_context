@@ -22,15 +22,15 @@ Gem::Specification.new do |spec|
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
-  spec.required_ruby_version = '>= 2.5.8'
+  spec.required_ruby_version = '>= 2.5.8' # rubocop:disable Gemspec/RequiredRubyVersion
   spec.license = 'MIT'
 
   spec.add_dependency "activesupport", "> 2.0"
   spec.add_dependency "rspec", "> 3.0"
 
-  spec.add_development_dependency "bundler", "~> 2.1"
+  spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit", "> 0.6.0"
-  spec.add_development_dependency "codacy-coverage", '~> 2.1.0'
+  spec.add_development_dependency "codacy-coverage", '>= 2.1.0'
   spec.add_development_dependency "faker", "> 1.8"
   spec.add_development_dependency "guard-rspec", "> 4.7"
   spec.add_development_dependency "overcommit", '> 0.46'

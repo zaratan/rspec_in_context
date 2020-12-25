@@ -92,7 +92,7 @@ describe RspecInContext::InContext do
       expect(RspecInContext::InContext).to receive(:warn)
     end
 
-    RSpec.define_context(:oustide_context) {}
+    RSpec.define_context(:oustide_context) {} # rubocop:disable Lint/EmptyBlock
 
     it "warns" do
       RSpec.define_context(:oustide_context)
@@ -144,7 +144,7 @@ describe RspecInContext::InContext do
       end
     end
 
-    define_context "inside namespaced", ns: :inside_2 do
+    define_context "inside namespaced", ns: :inside2 do
       it "works" do
         expect(true).to be_truthy
       end
@@ -154,7 +154,7 @@ describe RspecInContext::InContext do
     in_context "inside namespaced", namespace: :inside
     in_context :inside, ns: :inside
     in_context "inside namespaced", ns: :inside
-    in_context "inside namespaced", ns: :inside_2
+    in_context "inside namespaced", ns: :inside2
     test_inexisting_context "inside namespaced", namespace: :not_exist
     describe "context isolation still work" do
       define_context "isolated namespaced", ns: :isolated do

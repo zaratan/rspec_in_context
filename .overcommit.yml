@@ -10,3 +10,5 @@ PrePush:
   RSpec:
     enabled: true
     command: ['bundle', 'exec', 'rspec'] # Invoke within Bundler context
+  Rubocop:
+    enabled: true
