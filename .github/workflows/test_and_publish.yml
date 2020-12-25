@@ -81,7 +81,7 @@ jobs:
     - name: Prepare credentials
       env:
         RUBYGEM_KEY: ${{ secrets.RUBYGEM_KEY }}
-      run: "echo -e \"---\\r\\n:rubygems_api_key: $RUBYGEM_KEY\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials"
+      run: "mkdir -p ~/.gem/credentials && echo -e \"---\\r\\n:rubygems_api_key: $RUBYGEM_KEY\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials"
     - name: Setup username/email
       run: "git config --global user.email zaratan@hey.com && git config --global user.name \"Denis <Zaratan> Pasin\""
     - name: Publish
