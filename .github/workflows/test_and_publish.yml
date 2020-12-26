@@ -6,7 +6,10 @@ on:
       - main
 
 jobs:
-  test-2_5:
+  tests:
+    strategy:
+      matrix:
+        ruby: [2.5, 2.6, 2.7, 3.0]
     runs-on: ubuntu-latest
 
     steps:
@@ -14,52 +17,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 2.5
-    - name: Install dependencies
-      run: bundle install
-    - name: Run linter
-      run: bundle exec rubocop
-    - name: Run tests
-      run: bundle exec rspec
-  test-2_6:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 2.6
-    - name: Install dependencies
-      run: bundle install
-    - name: Run linter
-      run: bundle exec rubocop
-    - name: Run tests
-      run: bundle exec rspec
-  test-2_7:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 2.7
-    - name: Install dependencies
-      run: bundle install
-    - name: Run linter
-      run: bundle exec rubocop
-    - name: Run tests
-      run: bundle exec rspec
-  test-3_0:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 3.0
+        ruby-version: ${{ matrix.ruby }}
     - name: Install dependencies
       run: bundle install
     - name: Run linter
@@ -67,7 +25,7 @@ jobs:
     - name: Run tests
       run: bundle exec rspec
   release:
-    needs: [test-2_5, test-2_6, test-2_7, test-3_0]
+    needs: [tests]
     runs-on: ubuntu-latest
 
     steps:
@@ -85,4 +43,4 @@ jobs:
     - name: Setup username/email
       run: "git config --global user.email zaratan@hey.com && git config --global user.name \"Denis <Zaratan> Pasin\""
     - name: Publish
-      run: rake release
+      run: 'git diff main lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" && rake release || echo "No release for now"'
