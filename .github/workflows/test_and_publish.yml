@@ -42,5 +42,7 @@ jobs:
       run: "mkdir -p ~/.gem && echo -e \"---\\r\\n:rubygems_api_key: $RUBYGEM_KEY\" > ~/.gem/credentials && chmod 0600 ~/.gem/credentials"
     - name: Setup username/email
       run: "git config --global user.email zaratan@hey.com && git config --global user.name \"Denis <Zaratan> Pasin\""
+    - name: Fetch tags from remote
+      run: "git fetch -t"
     - name: Publish if version change
       run: 'git diff `git tag | tail -1` lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" && rake release || echo "No release for now"'
