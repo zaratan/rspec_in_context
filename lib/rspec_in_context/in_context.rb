@@ -6,7 +6,12 @@ module RspecInContext
   class NoContextFound < StandardError; end
 
   # Context struct
-  Context = Struct.new(:block, :owner, :name, :namespace)
+  # @attr [Proc] block what will be executed in the test context
+  # @attr [Class] owner current rspec context class. This will be used to know where a define_context has been defined
+  # @attr [String | Symbol] name represent the name by which the context can be find.
+  # @attr [String | Symbol] namespace namespace for context names to avoid collisions
+  # @attr [Boolean] silent does the in_context should wrap itself into a context with its name upon execution
+  Context = Struct.new(:block, :owner, :name, :namespace, :silent)
 
   # Main module containing almost every methods
   module InContext
@@ -29,10 +34,10 @@ module RspecInContext
       # @api private
       #
       # @note Will warn if a context is overriden
-      def add_context(context_name, owner = nil, namespace = nil, &block)
+      def add_context(context_name, owner = nil, namespace = nil, silent = true, &block) # rubocop:disable Style/OptionalBooleanParameter
         namespace ||= GLOBAL_CONTEXT
         warn("Overriding an existing context: #{context_name}@#{namespace}") if contexts[namespace][context_name]
-        contexts[namespace][context_name] = Context.new(block, owner, context_name, namespace)
+        contexts[namespace][context_name] = Context.new(block, owner, context_name, namespace, silent)
       end
 
       # Find a context.
@@ -63,8 +68,8 @@ module RspecInContext
 
       # @api private
       # Define a context from outside a RSpec.describe block
-      def outside_define_context(context_name, namespace, &block)
-        InContext.add_context(context_name, nil, namespace, &block)
+      def outside_define_context(context_name, namespace, silent, &block)
+        InContext.add_context(context_name, nil, namespace, silent, &block)
       end
     end
 
@@ -80,8 +85,13 @@ module RspecInContext
       def in_context(context_name, *args, namespace: nil, ns: nil, &block)
         namespace ||= ns
         Thread.current[:test_block] = block
+        context_to_exec = InContext.find_context(context_name, namespace)
+        if context_to_exec.silent
+          return instance_exec(*args, &context_to_exec.block)
+        end
+
         context(context_name.to_s) do
-          instance_exec(*args, &InContext.find_context(context_name, namespace).block)
+          instance_exec(*args, &context_to_exec.block)
         end
       end
 
@@ -102,12 +112,15 @@ module RspecInContext
       #   It helps reducing colisions when you define "global" contexts
       # @param ns [String, Symbol] Alias of namespace
       # @param block [Proc] Contain the code that will be injected with #in_context later
+      # @param silent [Boolean] Does the in_context should wrap itself into a context block with its name
+      # @param print_context [Boolean] Reverse alias of silent
       #
       # @note contexts are scoped to the block they are defined in.
-      def define_context(context_name, namespace: nil, ns: nil, &block)
+      def define_context(context_name, namespace: nil, ns: nil, silent: true, print_context: nil, &block)
         namespace ||= ns
+        silent = print_context.nil? ? silent : !print_context
         instance_exec do
-          InContext.add_context(context_name, hooks.instance_variable_get(:@owner), namespace, &block)
+          InContext.add_context(context_name, hooks.instance_variable_get(:@owner), namespace, silent, &block)
         end
       end
     end

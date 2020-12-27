@@ -219,6 +219,54 @@ in_context "namespaced context", namespace: "namespace name"
 in_context "namespaced context", ns: "namespace name"
 ```
 
+#### Making `in_context` adverstise itself
+
+The fact that a `in_context` block is used inside the test is silent and invisible by default.
+
+But, there's some case where it helps to make the `in_context` to wrap its execution in a `context` block.
+For example:
+```ruby
+define_context "with my_var defined" do
+  before do
+    described_class.set_my_var(true)
+  end
+
+  it "works"
+end
+
+define_context "without my_var defined" do
+  it "doesn't work"
+end
+
+RSpec.describe MyNiceClass do
+  in_context "with my_var defined"
+  in_context "without my_var defined"
+end
+```
+Using a `rspec -f doc` will only print "MyNiceClass works" and "MyNiceClass doesn't work" which is not really a good documentation.
+
+So, you can define a context specifying it not to be `silent` or to `print_context`.
+For example :
+```ruby
+define_context "with my_var defined", silent: false do
+  before do
+    described_class.set_my_var(true)
+  end
+
+  it "works"
+end
+
+define_context "without my_var defined", print_context: true do
+  it "doesn't work"
+end
+
+RSpec.describe MyNiceClass do
+  in_context "with my_var defined"
+  in_context "without my_var defined"
+end
+```
+Will print "MyNiceClass with my_var defined works" and "MyNiceClass without my_var defined doesn't work". Which is valid and readable documentation.
+
 ## Development
 
 

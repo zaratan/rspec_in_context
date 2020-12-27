@@ -6,15 +6,39 @@ RSpec.define_context "outside in_context" do
   end
 end
 
-RSpec.define_context "outside namespaced", namespace: 'outside' do
+RSpec.define_context "outside namespaced", namespace: 'outside', silent: false do
   it "works" do
     expect(true).to be_truthy
   end
 end
 
-RSpec.define_context "outside short-namespaced", ns: 'outside' do
+RSpec.define_context "outside short-namespaced", ns: 'outside', silent: false do
   it "works" do
     expect(true).to be_truthy
+  end
+end
+
+RSpec.define_context "silent outside in_context" do
+  $outside_in_context_class_silent = hooks.instance_variable_get(:@owner)
+
+  it "is not silent" do
+    expect($outside_in_context_class_silent).to eq($current_class)
+  end
+end
+
+RSpec.define_context "not silent outside in_context", silent: false do
+  $outside_in_context_class_not_silent = hooks.instance_variable_get(:@owner)
+
+  it "is not silent" do
+    expect($current_class).not_to eq($outside_in_context_class_not_silent)
+  end
+end
+
+RSpec.define_context "print_context outside in_context", print_context: true do
+  $outside_in_context_class_print_context = hooks.instance_variable_get(:@owner)
+
+  it "is not silent" do
+    expect($current_class).not_to eq($outside_in_context_class_print_context)
   end
 end
 
@@ -125,6 +149,50 @@ describe RspecInContext::InContext do
     in_context "in_context in in_context"
   end
 
+  describe "silent and print_context options" do
+    $current_class = hooks.instance_variable_get(:@owner)
+    after(:all) do
+      $current_class = nil
+      $in_context_class_silent = nil
+      $in_context_class_not_silent = nil
+      $in_context_class_print_context = nil
+      $outside_in_context_class_not_silent = nil
+      $outside_in_context_class_print_context = nil
+      $outside_in_context_class_silent = nil
+    end
+
+    define_context "silent context" do
+      $in_context_class_silent = hooks.instance_variable_get(:@owner)
+
+      it "is silent by default" do
+        expect($current_class).to eq($in_context_class_silent)
+      end
+    end
+
+    define_context "not silent context", silent: false do
+      $in_context_class_not_silent = hooks.instance_variable_get(:@owner)
+
+      it "is not silent" do
+        expect($current_class).not_to eq($in_context_class_not_silent)
+      end
+    end
+
+    define_context "print_context context", print_context: true do
+      $in_context_class_print_context = hooks.instance_variable_get(:@owner)
+
+      it "is not silent" do
+        expect($current_class).not_to eq($in_context_class_print_context)
+      end
+    end
+
+    in_context "silent context"
+    in_context "not silent context"
+    in_context "print_context context"
+    in_context "silent outside in_context"
+    in_context "not silent outside in_context"
+    in_context "print_context outside in_context"
+  end
+
   describe "namespacing" do
     in_context "outside namespaced"
     in_context "outside namespaced", namespace: :outside
@@ -132,19 +200,19 @@ describe RspecInContext::InContext do
     in_context "outside short-namespaced", ns: :outside
     test_inexisting_context "outside namespaced", namespace: :not_exist
 
-    define_context "inside namespaced", namespace: :inside do
+    define_context "inside namespaced", namespace: :inside, silent: false do
       it "works" do
         expect(true).to be_truthy
       end
     end
 
-    define_context :inside, ns: :inside do
+    define_context :inside, ns: :inside, silent: false do
       it "works" do
         expect(true).to be_truthy
       end
     end
 
-    define_context "inside namespaced", ns: :inside2 do
+    define_context "inside namespaced", ns: :inside2, silent: false do
       it "works" do
         expect(true).to be_truthy
       end
@@ -157,7 +225,7 @@ describe RspecInContext::InContext do
     in_context "inside namespaced", ns: :inside2
     test_inexisting_context "inside namespaced", namespace: :not_exist
     describe "context isolation still work" do
-      define_context "isolated namespaced", ns: :isolated do
+      define_context "isolated namespaced", ns: :isolated, silent: false do
         it "works" do
           expect(true).to be_truthy
         end

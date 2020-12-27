@@ -21,9 +21,12 @@ module RSpec
   # @param name [String, Symbol] Name of the defined context
   # @param namespace [String, Symbol] Namespace where to store your context
   # @param ns Alias of namespace
+  # @param silent [Boolean] Does the in_context should wrap itself into a context block with its name
+  # @param print_context [Boolean] Reverse alias of silent
   # @param block [Proc] code that will be injected later
-  def self.define_context(name, namespace: nil, ns: nil, &block)
+  def self.define_context(name, namespace: nil, ns: nil, silent: true, print_context: nil, &block)
     namespace ||= ns
-    RspecInContext::InContext.outside_define_context(name, namespace, &block)
+    silent = print_context.nil? ? silent : !print_context
+    RspecInContext::InContext.outside_define_context(name, namespace, silent, &block)
   end
 end

@@ -18,6 +18,10 @@ Metrics/BlockLength:
     - 'vendor/bundle'
     - '*.gemspec'
 
+Style/GlobalVars:
+  Exclude:
+    - spec/rspec_in_context/in_context_spec.rb
+
 Naming/MethodParameterName:
   Enabled: false
 
