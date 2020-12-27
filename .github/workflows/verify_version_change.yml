@@ -14,8 +14,8 @@ jobs:
       - name: Fetch main branch
         run: git fetch origin main:main
       - name: Verify if there's a change in version
-        run: "git diff main lib/rspec_in_context/version.rb | grep VERSION"
+        run: "git diff main -- lib/rspec_in_context/version.rb | grep VERSION"
       - name: Print new version
-        run: 'git diff main lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?"'
+        run: 'git diff main -- lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?"'
       - name: Verify if higher version
-        run: '[[ $(git diff main lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?") > $(git diff main lib/rspec_in_context/version.rb | grep -E "^-.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?") ]]'
+        run: '[[ $(git diff main -- lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?") > $(git diff main -- lib/rspec_in_context/version.rb | grep -E "^-.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?") ]]'

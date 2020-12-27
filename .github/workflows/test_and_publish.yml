@@ -18,8 +18,7 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-    - name: Install dependencies
-      run: bundle install
+        bundler-cache: true
     - name: Run linter
       run: bundle exec rubocop
     - name: Run tests
@@ -34,8 +33,7 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: 3.0
-    - name: Install dependencies
-      run: bundle install
+        bundler-cache: true
     - name: Prepare credentials
       env:
         RUBYGEM_KEY: ${{ secrets.RUBYGEM_KEY }}
@@ -45,4 +43,4 @@ jobs:
     - name: Fetch tags from remote
       run: "git fetch -t"
     - name: Publish if version change
-      run: 'git diff `git tag | tail -1` lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" && rake release || echo "No release for now"'
+      run: 'git diff `git tag | tail -1` -- lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" && rake release || echo "No release for now"'
