@@ -43,4 +43,4 @@ jobs:
     - name: Setup username/email
       run: "git config --global user.email zaratan@hey.com && git config --global user.name \"Denis <Zaratan> Pasin\""
     - name: Publish if version change
-      run: 'git diff main lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" && rake release || echo "No release for now"'
+      run: 'git diff `git tag | tail -1` lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" && rake release || echo "No release for now"'
