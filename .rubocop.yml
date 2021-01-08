@@ -19,6 +19,9 @@ Metrics/BlockLength:
     - 'vendor/bundle'
     - '*.gemspec'
 
+Lint/EmptyBlock:
+  Enabled: false
+
 Style/GlobalVars:
   Exclude:
     - spec/rspec_in_context/in_context_spec.rb

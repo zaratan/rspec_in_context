@@ -10,7 +10,7 @@ module RspecInContext
   # @attr [Class] owner current rspec context class. This will be used to know where a define_context has been defined
   # @attr [String | Symbol] name represent the name by which the context can be find.
   # @attr [String | Symbol] namespace namespace for context names to avoid collisions
-  # @attr [Boolean] silent does the in_context should wrap itself into a context with its name upon execution
+  # @attr [Boolean] silent does the in_context wrap itself into a context with its name or an anonymous context
   Context = Struct.new(:block, :owner, :name, :namespace, :silent)
 
   # Main module containing almost every methods
@@ -54,7 +54,7 @@ module RspecInContext
       # Look into every namespace to find the context
       # @api private
       def find_context_in_any_namespace(context_name)
-        valid_namespace = contexts.find{ |_, namespaced_contexts| namespaced_contexts[context_name] }&.last
+        valid_namespace = contexts.find { |_, namespaced_contexts| namespaced_contexts[context_name] }&.last
         valid_namespace[context_name] if valid_namespace
       end
 
@@ -62,7 +62,7 @@ module RspecInContext
       # Delete a context
       def remove_context(current_class)
         contexts.each_value do |namespaced_contexts|
-          namespaced_contexts.delete_if{ |_, context| context.owner == current_class }
+          namespaced_contexts.delete_if { |_, context| context.owner == current_class }
         end
       end
 
@@ -87,7 +87,9 @@ module RspecInContext
         Thread.current[:test_block] = block
         context_to_exec = InContext.find_context(context_name, namespace)
         if context_to_exec.silent
-          return instance_exec(*args, &context_to_exec.block)
+          return context do
+            instance_exec(*args, &context_to_exec.block)
+          end
         end
 
         context(context_name.to_s) do
@@ -103,7 +105,7 @@ module RspecInContext
       def execute_tests
         instance_exec(&Thread.current[:test_block]) if Thread.current[:test_block]
       end
-      alias_method :instanciate_context, :execute_tests
+      alias instanciate_context execute_tests
 
       # Let you define a context that can be reused later
       #
@@ -112,7 +114,7 @@ module RspecInContext
       #   It helps reducing colisions when you define "global" contexts
       # @param ns [String, Symbol] Alias of namespace
       # @param block [Proc] Contain the code that will be injected with #in_context later
-      # @param silent [Boolean] Does the in_context should wrap itself into a context block with its name
+      # @param silent [Boolean] Does the in_context wrap itself into a context with its name or an anonymous context
       # @param print_context [Boolean] Reverse alias of silent
       #
       # @note contexts are scoped to the block they are defined in.

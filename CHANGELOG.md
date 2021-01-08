@@ -12,6 +12,10 @@ This is a release in order to test all type of actions
 ### Added
 - Cache support in github actions for ease of development
 
+## [1.1.0.2] - 2021-01-08
+### Changed
+- Wrapping silent in_context in anonymous contexts
+
 ## [1.1.0] - 2020-12-27
 ### Added
 - **BREAKING** Option to silence in_context block. They used to always wrap themself into a context block with their name. This is not the case anymore. All in_context are silent unless explicitely declared as not. 

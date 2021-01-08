@@ -222,8 +222,9 @@ in_context "namespaced context", ns: "namespace name"
 #### Making `in_context` adverstise itself
 
 The fact that a `in_context` block is used inside the test is silent and invisible by default.
+`in_context` will still wrap its own execution inside a anonymous context.
 
-But, there's some case where it helps to make the `in_context` to wrap its execution in a `context` block.
+But, there's some case where it helps to make the `in_context` to wrap its execution in a named `context` block.
 For example:
 ```ruby
 define_context "with my_var defined" do

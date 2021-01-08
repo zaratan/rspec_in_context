@@ -10,11 +10,10 @@ SimpleCov.at_exit do
   SimpleCov.result.format!
   SimpleCov.minimum_coverage 90
   SimpleCov.minimum_coverage_by_file 80
-  SimpleCov.maximum_coverage_drop 5
 end
 
 SimpleCov.start do
-  load_profile "test_frameworks"
+  load_profile 'test_frameworks'
   add_filter do |source_file|
     source_file.lines.count < 5
   end
