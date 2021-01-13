@@ -4,18 +4,19 @@
 module ContextTestHelper
   def test_inexisting_context(context_name, description = nil, namespace: nil, ns: nil)
     namespace ||= ns
-    description ||= "using in_context defined in a another context"
+    description ||= 'using in_context defined in a another context'
     instance_exec do
       in_context context_name, ns: namespace
+
       # If we get there the test has failed T_T
       describe description do
-        it "is well scoped" do
+        it 'is well scoped' do
           expect(false).to be_truthy
         end
       end
     rescue RspecInContext::NoContextFound
       describe description do
-        it "is well scoped" do
+        it 'is well scoped' do
           expect(true).to be_truthy
         end
       end

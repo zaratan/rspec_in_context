@@ -1,0 +1,12 @@
+{
+  "name": "rspec_in_context",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:denispasin/rspec_in_context.git",
+  "author": "Denis <Zaratan> Pasin <zaratan@hey.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@prettier/plugin-ruby": "^1.3.0",
+    "prettier": "^2.2.1"
+  }
+}

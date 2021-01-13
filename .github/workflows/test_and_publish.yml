@@ -23,8 +23,20 @@ jobs:
       run: bundle exec rubocop
     - name: Run tests
       run: bundle exec rspec
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - name: Install yarn dep
+      run: yarn install
+    - name: Check prettier
+      run: yarn prettier -c '**/*.rb' 
   release:
-    needs: [tests]
+    needs: [tests, prettier]
     runs-on: ubuntu-latest
 
     steps:

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'active_support/all'
-require "rspec_in_context/version"
-require "rspec_in_context/in_context"
-require "rspec_in_context/context_management"
+require 'rspec_in_context/version'
+require 'rspec_in_context/in_context'
+require 'rspec_in_context/context_management'
 
 # Main wrapping module
 module RspecInContext

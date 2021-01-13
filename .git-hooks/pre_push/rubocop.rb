@@ -6,7 +6,7 @@ module Overcommit
       # Runs `rubocop` on every files.
       class Rubocop < Base
         def run
-          result = execute(['rubocop', '-P'])
+          result = execute(%w[rubocop -P])
           return :pass if result.success?
 
           output = result.stdout + result.stderr

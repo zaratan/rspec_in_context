@@ -112,9 +112,7 @@ describe RspecInContext::InContext do
   end
 
   describe 'overriding an existing context' do
-    before do
-      expect(RspecInContext::InContext).to receive(:warn)
-    end
+    before { expect(RspecInContext::InContext).to receive(:warn) }
 
     RSpec.define_context(:oustide_context) {}
 

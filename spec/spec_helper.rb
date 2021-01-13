@@ -14,9 +14,7 @@ end
 
 SimpleCov.start do
   load_profile 'test_frameworks'
-  add_filter do |source_file|
-    source_file.lines.count < 5
-  end
+  add_filter { |source_file| source_file.lines.count < 5 }
 end
 
 require_relative '../lib/rspec_in_context'

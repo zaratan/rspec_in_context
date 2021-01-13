@@ -1,6 +1,9 @@
 inherit_from:
   - http://relaxed.ruby.style/rubocop.yml
 
+inherit_gem:
+  prettier: rubocop.yml
+
 require: 
   - rubocop-performance
 
@@ -8,9 +11,11 @@ AllCops:
   NewCops: enable
   DisplayStyleGuide: true
   DisplayCopNames: true
+  SuggestExtensions: false
   Exclude:
     - 'bin/*'
     - 'vendor/**/*'
+    - 'node_modules/**/*'
 
 Metrics/BlockLength:
   Exclude:
@@ -26,46 +31,13 @@ Style/GlobalVars:
   Exclude:
     - spec/rspec_in_context/in_context_spec.rb
 
-Naming/MethodParameterName:
+### Prettier
+Style/OptionalBooleanParameter:
   Enabled: false
 
-Layout/DotPosition:
-  Enabled: true
-  EnforcedStyle: trailing
+Style/GuardClause:
+  Enabled: false
 
-Style/TrailingCommaInArrayLiteral:
-  Enabled: true
-  EnforcedStyleForMultiline: comma
-
-Style/TrailingCommaInHashLiteral:
-  Enabled: true
-  EnforcedStyleForMultiline: comma
-
-Layout/MultilineArrayLineBreaks:
-  Enabled: true
-
-Layout/MultilineHashKeyLineBreaks:
-  Enabled: true
-
-Layout/MultilineMethodArgumentLineBreaks:
-  Enabled: true
-
-Layout/FirstArrayElementLineBreak:
-  Enabled: true
-
-Layout/FirstHashElementLineBreak:
-  Enabled: true
-
-Layout/FirstMethodArgumentLineBreak:
-  Enabled: true
-
-Layout/MultilineAssignmentLayout:
-  Enabled: true
-
-Layout/LineLength:
-  Enabled: true
-  Max: 120
-  AutoCorrect: true
-  Exclude:
-    - Gemfile
-    - Guardfile
+### End Prettier
+Naming/MethodParameterName:
+  Enabled: false

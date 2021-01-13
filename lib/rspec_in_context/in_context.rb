@@ -34,7 +34,7 @@ module RspecInContext
       # @api private
       #
       # @note Will warn if a context is overriden
-      def add_context(context_name, owner = nil, namespace = nil, silent = true, &block) # rubocop:disable Style/OptionalBooleanParameter
+      def add_context(context_name, owner = nil, namespace = nil, silent = true, &block)
         namespace ||= GLOBAL_CONTEXT
         warn("Overriding an existing context: #{context_name}@#{namespace}") if contexts[namespace][context_name]
         contexts[namespace][context_name] = Context.new(block, owner, context_name, namespace, silent)
@@ -47,8 +47,7 @@ module RspecInContext
           contexts[namespace][context_name]
         else
           contexts[GLOBAL_CONTEXT][context_name] || find_context_in_any_namespace(context_name)
-        end ||
-          (raise NoContextFound, "No context found with name #{context_name}")
+        end || (raise NoContextFound, "No context found with name #{context_name}")
       end
 
       # Look into every namespace to find the context
@@ -86,15 +85,9 @@ module RspecInContext
         namespace ||= ns
         Thread.current[:test_block] = block
         context_to_exec = InContext.find_context(context_name, namespace)
-        if context_to_exec.silent
-          return context do
-            instance_exec(*args, &context_to_exec.block)
-          end
-        end
+        return context { instance_exec(*args, &context_to_exec.block) } if context_to_exec.silent
 
-        context(context_name.to_s) do
-          instance_exec(*args, &context_to_exec.block)
-        end
+        context(context_name.to_s) { instance_exec(*args, &context_to_exec.block) }
       end
 
       # Used in context definition
