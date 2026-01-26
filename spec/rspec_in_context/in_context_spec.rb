@@ -126,21 +126,24 @@ describe RspecInContext::InContext do
 
   describe 'input validation' do
     it 'raises InvalidContextName when context_name is nil' do
-      expect do
-        RSpec.define_context(nil) {}
-      end.to raise_error(RspecInContext::InvalidContextName, /cannot be nil or empty/)
+      expect { RSpec.define_context(nil) {} }.to raise_error(
+        RspecInContext::InvalidContextName,
+        /cannot be nil or empty/,
+      )
     end
 
     it 'raises InvalidContextName when context_name is empty string' do
-      expect do
-        RSpec.define_context('') {}
-      end.to raise_error(RspecInContext::InvalidContextName, /cannot be nil or empty/)
+      expect { RSpec.define_context('') {} }.to raise_error(
+        RspecInContext::InvalidContextName,
+        /cannot be nil or empty/,
+      )
     end
 
     it 'raises MissingDefinitionBlock when no block is provided' do
-      expect do
-        RSpec.define_context('no_block_context')
-      end.to raise_error(RspecInContext::MissingDefinitionBlock, /requires a block/)
+      expect { RSpec.define_context('no_block_context') }.to raise_error(
+        RspecInContext::MissingDefinitionBlock,
+        /requires a block/,
+      )
     end
 
     it 'raises AmbiguousContextName when same name exists in multiple namespaces' do
@@ -149,9 +152,10 @@ describe RspecInContext::InContext do
       RSpec.define_context(unique_name, ns: :namespace_b) { it('works') { expect(true).to be_truthy } }
 
       # in_context calls find_context internally, so we test find_context directly
-      expect do
-        RspecInContext::InContext.find_context(unique_name)
-      end.to raise_error(RspecInContext::AmbiguousContextName, /exists in multiple namespaces/)
+      expect { RspecInContext::InContext.find_context(unique_name) }.to raise_error(
+        RspecInContext::AmbiguousContextName,
+        /exists in multiple namespaces/,
+      )
     end
   end
 

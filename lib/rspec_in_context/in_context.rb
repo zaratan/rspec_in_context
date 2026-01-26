@@ -75,7 +75,7 @@ module RspecInContext
           namespace_names = matching_namespaces.keys.join(', ')
           raise AmbiguousContextName,
                 "Context '#{context_name}' exists in multiple namespaces (#{namespace_names}). " \
-                'Please specify a namespace.'
+                  'Please specify a namespace.'
         end
         matching_namespaces.values.first&.[](context_name)
       end
