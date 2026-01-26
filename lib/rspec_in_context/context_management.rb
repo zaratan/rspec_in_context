@@ -6,7 +6,7 @@ module RspecInContext
     # @api private
     # prepending a RSpec method so we can know when a describe/context block finish
     # its reading
-    def subclass(parent, description, args, registration_collection, &example_group_block)
+    def subclass(parent, description, args, registration_collection, &)
       subclass = super
       RspecInContext::InContext.remove_context(subclass)
       subclass

@@ -9,3 +9,7 @@
 
 Gemfile.lock
 vendor/cache
+
+# Claude Code
+CLAUDE.md
+.claude/

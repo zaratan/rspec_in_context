@@ -90,8 +90,8 @@ module RspecInContext
 
       # @api private
       # Define a context from outside a RSpec.describe block
-      def outside_define_context(context_name, namespace, silent, &block)
-        InContext.add_context(context_name, nil, namespace, silent, &block)
+      def outside_define_context(context_name, namespace, silent, &)
+        InContext.add_context(context_name, nil, namespace, silent, &)
       end
     end
 

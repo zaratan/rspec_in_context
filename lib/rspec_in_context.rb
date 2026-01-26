@@ -24,9 +24,9 @@ module RSpec
   # @param silent [Boolean] Does the in_context should wrap itself into a context block with its name
   # @param print_context [Boolean] Reverse alias of silent
   # @param block [Proc] code that will be injected later
-  def self.define_context(name, namespace: nil, ns: nil, silent: true, print_context: nil, &block)
+  def self.define_context(name, namespace: nil, ns: nil, silent: true, print_context: nil, &)
     namespace ||= ns
     silent = !print_context unless print_context.nil?
-    RspecInContext::InContext.outside_define_context(name, namespace, silent, &block)
+    RspecInContext::InContext.outside_define_context(name, namespace, silent, &)
   end
 end
