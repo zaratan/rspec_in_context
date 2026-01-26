@@ -22,7 +22,7 @@ Gem::Specification.new do |spec|
   spec.bindir        = "exe"
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
-  spec.required_ruby_version = '>= 2.5.8' # rubocop:disable Gemspec/RequiredRubyVersion
+  spec.required_ruby_version = '>= 3.2.0'
   spec.license = 'MIT'
 
   spec.add_dependency "activesupport", "> 2.0"
@@ -30,7 +30,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit", "> 0.6.0"
-  spec.add_development_dependency "codacy-coverage", '>= 2.1.0'
   spec.add_development_dependency "faker", "> 1.8"
   spec.add_development_dependency "guard-rspec", "> 4.7"
   spec.add_development_dependency "overcommit", '> 0.46'
@@ -42,4 +41,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "simplecov", "> 0.16"
   spec.add_development_dependency "solargraph"
   spec.add_development_dependency "yard"
+spec.metadata['rubygems_mfa_required'] = 'true'
 end

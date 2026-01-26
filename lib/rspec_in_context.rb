@@ -26,7 +26,7 @@ module RSpec
   # @param block [Proc] code that will be injected later
   def self.define_context(name, namespace: nil, ns: nil, silent: true, print_context: nil, &block)
     namespace ||= ns
-    silent = print_context.nil? ? silent : !print_context
+    silent = !print_context unless print_context.nil?
     RspecInContext::InContext.outside_define_context(name, namespace, silent, &block)
   end
 end

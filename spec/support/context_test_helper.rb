@@ -4,21 +4,16 @@
 module ContextTestHelper
   def test_inexisting_context(context_name, description = nil, namespace: nil, ns: nil)
     namespace ||= ns
-    description ||= 'using in_context defined in a another context'
-    instance_exec do
-      in_context context_name, ns: namespace
+    description ||= "context '#{context_name}' should not be accessible here"
+    context_name_captured = context_name
+    namespace_captured = namespace
 
-      # If we get there the test has failed T_T
-      describe description do
-        it 'is well scoped' do
-          expect(false).to be_truthy
-        end
-      end
-    rescue RspecInContext::NoContextFound
-      describe description do
-        it 'is well scoped' do
-          expect(true).to be_truthy
-        end
+    describe description do
+      it 'raises NoContextFound' do
+        expect do
+          # We need to call in_context at runtime, not at definition time
+          self.class.in_context(context_name_captured, ns: namespace_captured)
+        end.to raise_error(RspecInContext::NoContextFound)
       end
     end
   end

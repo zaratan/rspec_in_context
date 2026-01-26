@@ -19,26 +19,22 @@ RSpec.define_context 'outside short-namespaced', ns: 'outside', silent: false do
 end
 
 RSpec.define_context 'silent outside in_context' do
-  $outside_in_context_class_silent = hooks.instance_variable_get(:@owner)
-
-  it 'is silent by default' do
-    expect($outside_in_context_class_silent.name.gsub(/::Anonymous(_\d)?/, '')).to eq($current_class.name)
+  it 'wraps in anonymous context by default' do
+    expect(self.class.name).to match(/Anonymous/)
   end
 end
 
 RSpec.define_context 'not silent outside in_context', silent: false do
-  $outside_in_context_class_not_silent = hooks.instance_variable_get(:@owner)
-
-  it 'is not silent' do
-    expect($current_class).not_to eq($outside_in_context_class_not_silent)
+  it 'wraps in named context when silent: false' do
+    # RSpec converts "not silent outside in_context" to "NotSilentOutsideInContext"
+    expect(self.class.name).to match(/NotSilentOutsideInContext/)
   end
 end
 
 RSpec.define_context 'print_context outside in_context', print_context: true do
-  $outside_in_context_class_print_context = hooks.instance_variable_get(:@owner)
-
-  it 'is not silent' do
-    expect($current_class).not_to eq($outside_in_context_class_print_context)
+  it 'wraps in named context when print_context: true' do
+    # RSpec converts "print_context outside in_context" to "PrintContextOutsideInContext"
+    expect(self.class.name).to match(/PrintContextOutsideInContext/)
   end
 end
 
@@ -112,13 +108,84 @@ describe RspecInContext::InContext do
   end
 
   describe 'overriding an existing context' do
-    before { expect(RspecInContext::InContext).to receive(:warn) }
+    it 'warns when redefining a context' do
+      unique_name = "context_override_test_#{rand(100_000)}"
+      warnings = []
+      allow(RspecInContext::InContext).to receive(:warn) { |msg| warnings << msg }
 
-    RSpec.define_context(:oustide_context) {}
+      # First definition - no warning expected
+      RSpec.define_context(unique_name) {}
+      expect(warnings).to be_empty
 
-    it 'warns' do
-      RSpec.define_context(:oustide_context)
+      # Second definition - should warn
+      RSpec.define_context(unique_name) {}
+      expect(warnings.size).to eq(1)
+      expect(warnings.first).to match(/Overriding an existing context: #{unique_name}/)
     end
+  end
+
+  describe 'input validation' do
+    it 'raises InvalidContextName when context_name is nil' do
+      expect do
+        RSpec.define_context(nil) {}
+      end.to raise_error(RspecInContext::InvalidContextName, /cannot be nil or empty/)
+    end
+
+    it 'raises InvalidContextName when context_name is empty string' do
+      expect do
+        RSpec.define_context('') {}
+      end.to raise_error(RspecInContext::InvalidContextName, /cannot be nil or empty/)
+    end
+
+    it 'raises MissingDefinitionBlock when no block is provided' do
+      expect do
+        RSpec.define_context('no_block_context')
+      end.to raise_error(RspecInContext::MissingDefinitionBlock, /requires a block/)
+    end
+
+    it 'raises AmbiguousContextName when same name exists in multiple namespaces' do
+      unique_name = "ambiguous_context_#{rand(100_000)}"
+      RSpec.define_context(unique_name, ns: :namespace_a) { it('works') { expect(true).to be_truthy } }
+      RSpec.define_context(unique_name, ns: :namespace_b) { it('works') { expect(true).to be_truthy } }
+
+      # in_context calls find_context internally, so we test find_context directly
+      expect do
+        RspecInContext::InContext.find_context(unique_name)
+      end.to raise_error(RspecInContext::AmbiguousContextName, /exists in multiple namespaces/)
+    end
+  end
+
+  describe 'edge cases' do
+    define_context 'context with execute_tests but no block' do
+      let(:defined_in_context) { :context_value }
+
+      execute_tests
+
+      it 'does not fail when execute_tests is called without a block' do
+        expect(defined_in_context).to eq(:context_value)
+      end
+    end
+
+    in_context 'context with execute_tests but no block'
+
+    define_context 'context with multiple arguments' do |arg1, arg2, arg3|
+      it "receives all arguments: #{arg1}, #{arg2}, #{arg3}" do
+        expect(arg1).to eq(:first)
+        expect(arg2).to eq(:second)
+        expect(arg3).to eq(:third)
+      end
+    end
+
+    in_context 'context with multiple arguments', :first, :second, :third
+
+    define_context :context_defined_with_symbol do
+      it 'works when defined with symbol' do
+        expect(true).to be_truthy
+      end
+    end
+
+    in_context :context_defined_with_symbol
+    in_context 'context_defined_with_symbol' # Also works with string
   end
 
   describe 'in_context calls' do
@@ -147,39 +214,94 @@ describe RspecInContext::InContext do
     in_context 'in_context in in_context'
   end
 
-  describe 'silent and print_context options' do
-    $current_class = hooks.instance_variable_get(:@owner)
-    after(:all) do
-      $current_class = nil
-      $in_context_class_silent = nil
-      $in_context_class_not_silent = nil
-      $in_context_class_print_context = nil
-      $outside_in_context_class_not_silent = nil
-      $outside_in_context_class_print_context = nil
-      $outside_in_context_class_silent = nil
+  describe 'nested in_context with blocks' do
+    define_context 'outer with execute' do
+      context 'outer layer' do
+        let(:outer_var) { :outer_value }
+
+        execute_tests
+      end
     end
 
-    define_context 'silent context' do
-      $in_context_class_silent = hooks.instance_variable_get(:@owner)
+    define_context 'middle with execute' do
+      context 'middle layer' do
+        let(:middle_var) { :middle_value }
 
-      it 'is silent by default' do
-        expect($current_class.name).to eq($in_context_class_silent.name.gsub(/::Anonymous(_\d)?/, ''))
+        execute_tests
+      end
+    end
+
+    define_context 'inner with execute' do
+      context 'inner layer' do
+        let(:inner_var) { :inner_value }
+
+        execute_tests
+      end
+    end
+
+    describe 'two levels of nesting with blocks' do
+      in_context 'outer with execute' do
+        it 'has access to outer_var from outer block' do
+          expect(outer_var).to eq(:outer_value)
+        end
+
+        in_context 'inner with execute' do
+          it 'has access to both outer_var and inner_var' do
+            expect(outer_var).to eq(:outer_value)
+            expect(inner_var).to eq(:inner_value)
+          end
+        end
+
+        it 'still has access to outer_var after inner context' do
+          expect(outer_var).to eq(:outer_value)
+        end
+      end
+    end
+
+    describe 'three levels of nesting with blocks' do
+      in_context 'outer with execute' do
+        in_context 'middle with execute' do
+          in_context 'inner with execute' do
+            it 'has access to all three variables' do
+              expect(outer_var).to eq(:outer_value)
+              expect(middle_var).to eq(:middle_value)
+              expect(inner_var).to eq(:inner_value)
+            end
+          end
+
+          it 'has access to outer and middle but not inner' do
+            expect(outer_var).to eq(:outer_value)
+            expect(middle_var).to eq(:middle_value)
+            expect(defined?(inner_var)).to be_falsy
+          end
+        end
+
+        it 'has access to outer only' do
+          expect(outer_var).to eq(:outer_value)
+          expect(defined?(middle_var)).to be_falsy
+        end
+      end
+    end
+  end
+
+  describe 'silent and print_context options' do
+    define_context 'silent context' do
+      it 'wraps in anonymous context by default' do
+        expect(self.class.name).to match(/Anonymous/)
       end
     end
 
     define_context 'not silent context', silent: false do
-      $in_context_class_not_silent = hooks.instance_variable_get(:@owner)
-
-      it 'is not silent' do
-        expect($current_class).not_to eq($in_context_class_not_silent)
+      it 'wraps in named context when silent: false' do
+        # RSpec converts "not silent context" to "NotSilentContext"
+        expect(self.class.name).to match(/NotSilentContext/)
       end
     end
 
     define_context 'print_context context', print_context: true do
-      $in_context_class_print_context = hooks.instance_variable_get(:@owner)
-
-      it 'is not silent' do
-        expect($current_class).not_to eq($in_context_class_print_context)
+      it 'wraps in named context when print_context: true' do
+        # RSpec converts "print_context context" to "PrintContextContext"
+        expect(self.class.name).to match(/PrintContextContext/)
       end
     end
 
@@ -210,17 +332,18 @@ describe RspecInContext::InContext do
       end
     end
 
-    define_context 'inside namespaced', ns: :inside2, silent: false do
+    define_context 'inside namespaced in inside2', ns: :inside2, silent: false do
       it 'works' do
         expect(true).to be_truthy
       end
     end
 
+    # When only one namespace has the context, it can be found without specifying namespace
     in_context 'inside namespaced'
     in_context 'inside namespaced', namespace: :inside
     in_context :inside, ns: :inside
     in_context 'inside namespaced', ns: :inside
-    in_context 'inside namespaced', ns: :inside2
+    in_context 'inside namespaced in inside2', ns: :inside2
     test_inexisting_context 'inside namespaced', namespace: :not_exist
     describe 'context isolation still work' do
       define_context 'isolated namespaced', ns: :isolated, silent: false do

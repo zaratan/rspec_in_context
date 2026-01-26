@@ -2,18 +2,18 @@ name: Test and Release
 
 on:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
   tests:
     strategy:
       matrix:
-        ruby: [2.5, 2.6, 2.7, 3.0]
+        ruby: ['3.2', '3.3', '3.4', 'head']
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -26,25 +26,25 @@ jobs:
   prettier:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Node
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v4
       with:
-        node-version: '14'
+        node-version: '20'
     - name: Install yarn dep
       run: yarn install
     - name: Check prettier
-      run: yarn prettier -c '**/*.rb' 
+      run: yarn prettier -c '**/*.rb'
   release:
     needs: [tests, prettier]
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.0
+        ruby-version: '3.4'
         bundler-cache: true
     - name: Prepare credentials
       env:

@@ -5,6 +5,15 @@ module RspecInContext
   # Error type when no context is find from its name (and eventualy namespace)
   class NoContextFound < StandardError; end
 
+  # Error type when define_context is called without a block
+  class MissingDefinitionBlock < ArgumentError; end
+
+  # Error type when context_name is nil or empty
+  class InvalidContextName < ArgumentError; end
+
+  # Error type when multiple namespaces contain a context with the same name
+  class AmbiguousContextName < StandardError; end
+
   # Context struct
   # @attr [Proc] block what will be executed in the test context
   # @attr [Class] owner current rspec context class. This will be used to know where a define_context has been defined
@@ -34,7 +43,14 @@ module RspecInContext
       # @api private
       #
       # @note Will warn if a context is overriden
+      # @raise [InvalidContextName] if context_name is nil or empty
+      # @raise [MissingDefinitionBlock] if no block is provided
       def add_context(context_name, owner = nil, namespace = nil, silent = true, &block)
+        if context_name.nil? || (context_name.respond_to?(:empty?) && context_name.empty?)
+          raise InvalidContextName, 'context_name cannot be nil or empty'
+        end
+        raise MissingDefinitionBlock, 'define_context requires a block' unless block
+
         namespace ||= GLOBAL_CONTEXT
         warn("Overriding an existing context: #{context_name}@#{namespace}") if contexts[namespace][context_name]
         contexts[namespace][context_name] = Context.new(block, owner, context_name, namespace, silent)
@@ -52,9 +68,16 @@ module RspecInContext
 
       # Look into every namespace to find the context
       # @api private
+      # @raise [AmbiguousContextName] if multiple namespaces contain the same context name
       def find_context_in_any_namespace(context_name)
-        valid_namespace = contexts.find { |_, namespaced_contexts| namespaced_contexts[context_name] }&.last
-        valid_namespace[context_name] if valid_namespace
+        matching_namespaces = contexts.select { |_, namespaced_contexts| namespaced_contexts[context_name] }
+        if matching_namespaces.size > 1
+          namespace_names = matching_namespaces.keys.join(', ')
+          raise AmbiguousContextName,
+                "Context '#{context_name}' exists in multiple namespaces (#{namespace_names}). " \
+                'Please specify a namespace.'
+        end
+        matching_namespaces.values.first&.[](context_name)
       end
 
       # @api private
@@ -83,11 +106,18 @@ module RspecInContext
       # @param block Content that will be re-injected (see #execute_tests)
       def in_context(context_name, *args, namespace: nil, ns: nil, &block)
         namespace ||= ns
-        Thread.current[:test_block] = block
+        Thread.current[:test_block_stack] ||= []
+        Thread.current[:test_block_stack].push(block)
         context_to_exec = InContext.find_context(context_name, namespace)
-        return context { instance_exec(*args, &context_to_exec.block) } if context_to_exec.silent
-
-        context(context_name.to_s) { instance_exec(*args, &context_to_exec.block) }
+        begin
+          if context_to_exec.silent
+            context { instance_exec(*args, &context_to_exec.block) }
+          else
+            context(context_name.to_s) { instance_exec(*args, &context_to_exec.block) }
+          end
+        ensure
+          Thread.current[:test_block_stack].pop
+        end
       end
 
       # Used in context definition
@@ -96,7 +126,8 @@ module RspecInContext
       # For convenience and readability, a `instanciate_context` alias have been defined
       # (for more examples look at tests)
       def execute_tests
-        instance_exec(&Thread.current[:test_block]) if Thread.current[:test_block]
+        current_block = Thread.current[:test_block_stack]&.last
+        instance_exec(&current_block) if current_block
       end
       alias instanciate_context execute_tests
 
@@ -113,7 +144,7 @@ module RspecInContext
       # @note contexts are scoped to the block they are defined in.
       def define_context(context_name, namespace: nil, ns: nil, silent: true, print_context: nil, &block)
         namespace ||= ns
-        silent = print_context.nil? ? silent : !print_context
+        silent = !print_context unless print_context.nil?
         instance_exec do
           InContext.add_context(context_name, hooks.instance_variable_get(:@owner), namespace, silent, &block)
         end
