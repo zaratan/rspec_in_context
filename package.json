@@ -6,7 +6,21 @@
   "author": "Denis <Zaratan> Pasin <zaratan@hey.com>",
   "license": "MIT",
   "devDependencies": {
-    "@prettier/plugin-ruby": "^1.3.0",
-    "prettier": "^2.2.1"
+    "@prettier/plugin-ruby": "^4.0",
+    "prettier": "^3.8.1"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "plugins": [
+      "@prettier/plugin-ruby"
+    ],
+    "overrides": [
+      {
+        "files": "*.rb",
+        "options": {
+          "parser": "ruby"
+        }
+      }
+    ]
   }
 }
