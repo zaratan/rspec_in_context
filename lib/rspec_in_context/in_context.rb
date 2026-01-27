@@ -137,9 +137,9 @@ module RspecInContext
       # @param block Content that will be re-injected (see #execute_tests)
       def in_context(context_name, *args, namespace: nil, ns: nil, &block)
         namespace ||= ns
+        context_to_exec = InContext.find_context(context_name, namespace)
         Thread.current[:test_block_stack] ||= []
         Thread.current[:test_block_stack].push(block)
-        context_to_exec = InContext.find_context(context_name, namespace)
         begin
           if context_to_exec.silent
             context { instance_exec(*args, &context_to_exec.block) }
