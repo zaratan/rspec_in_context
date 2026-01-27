@@ -39,7 +39,7 @@ jobs:
     - name: Install yarn dep
       run: yarn install
     - name: Check prettier
-      run: yarn prettier -c '**/*.rb'
+      run: yarn prettier -c lib/**/*.rb spec/**/*.rb *.gemspec Gemfile
   release:
     needs: [tests, prettier]
     runs-on: ubuntu-latest
