@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Not using in_context here because we want to be sure we are no hidding a bug.
+# Not using in_context here because we want to be sure we are no hiding a bug.
 module ContextTestHelper
   def test_inexisting_context(
     context_name,
