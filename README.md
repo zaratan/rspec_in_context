@@ -1,7 +1,6 @@
 # RspecInContext
 
 [![Gem Version](https://badge.fury.io/rb/rspec_in_context.svg)](https://badge.fury.io/rb/rspec_in_context)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6490834b08664dc898d0107c74a78357)](https://www.codacy.com/gh/zaratan/rspec_in_context/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=zaratan/rspec_in_context&amp;utm_campaign=Badge_Grade)
 ![Test and Release badge](https://github.com/zaratan/rspec_in_context/workflows/Test%20and%20Release/badge.svg)
 
 This gem is here to help you write better shared_examples in Rspec.
@@ -198,18 +197,18 @@ Or
 RSpec.define_context "this is a namespaced context", ns: "namespace name"
 ```
 
-* When you want to use a namespaced in_context, you have two choice:
+* When you want to use a namespaced in_context, you have two choices:
 
-Ignore any namespace and it will try to find a corresponding in_context in any_namespace (the ones defined without namespace have the priority);
+Ignore any namespace and it will try to find a corresponding in_context in any namespace (the ones defined without namespace have the priority). **Note**: if the same context name exists in multiple namespaces, an `AmbiguousContextName` error will be raised — you must specify the namespace explicitly.
 ```ruby
 define_context "namespaced context", ns: "namespace name" do
   [...]
 end
 
-in_context "namespaced context"
+in_context "namespaced context" # Works if only one namespace has this name
 ```
 
-Pass a namespace and it will look only in this context.
+Pass a namespace and it will look only in this namespace.
 ```ruby
 define_context "namespaced context", ns: "namespace name" do
   [...]
