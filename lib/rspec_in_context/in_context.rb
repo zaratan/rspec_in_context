@@ -2,7 +2,7 @@
 
 # Base module
 module RspecInContext
-  # Error type when no context is find from its name (and eventualy namespace)
+  # Error type when no context is find from its name (and eventually namespace)
   class NoContextFound < StandardError
   end
 
