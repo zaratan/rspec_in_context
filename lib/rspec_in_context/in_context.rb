@@ -3,16 +3,20 @@
 # Base module
 module RspecInContext
   # Error type when no context is find from its name (and eventualy namespace)
-  class NoContextFound < StandardError; end
+  class NoContextFound < StandardError
+  end
 
   # Error type when define_context is called without a block
-  class MissingDefinitionBlock < ArgumentError; end
+  class MissingDefinitionBlock < ArgumentError
+  end
 
   # Error type when context_name is nil or empty
-  class InvalidContextName < ArgumentError; end
+  class InvalidContextName < ArgumentError
+  end
 
   # Error type when multiple namespaces contain a context with the same name
-  class AmbiguousContextName < StandardError; end
+  class AmbiguousContextName < StandardError
+  end
 
   # Context struct
   # @attr [Proc] block what will be executed in the test context
@@ -36,7 +40,10 @@ module RspecInContext
       # Contexts container + creation
       # @api private
       def contexts
-        @contexts ||= HashWithIndifferentAccess.new { |hash, key| hash[key] = HashWithIndifferentAccess.new }
+        @contexts ||=
+          HashWithIndifferentAccess.new do |hash, key|
+            hash[key] = HashWithIndifferentAccess.new
+          end
       end
 
       # Meta method to add a new context
@@ -45,15 +52,32 @@ module RspecInContext
       # @note Will warn if a context is overriden
       # @raise [InvalidContextName] if context_name is nil or empty
       # @raise [MissingDefinitionBlock] if no block is provided
-      def add_context(context_name, owner = nil, namespace = nil, silent = true, &block)
-        if context_name.nil? || (context_name.respond_to?(:empty?) && context_name.empty?)
-          raise InvalidContextName, 'context_name cannot be nil or empty'
+      def add_context(
+        context_name,
+        owner = nil,
+        namespace = nil,
+        silent = true,
+        &block
+      )
+        if context_name.nil? ||
+             (context_name.respond_to?(:empty?) && context_name.empty?)
+          raise InvalidContextName, "context_name cannot be nil or empty"
         end
-        raise MissingDefinitionBlock, 'define_context requires a block' unless block
+        unless block
+          raise MissingDefinitionBlock, "define_context requires a block"
+        end
 
         namespace ||= GLOBAL_CONTEXT
-        warn("Overriding an existing context: #{context_name}@#{namespace}") if contexts[namespace][context_name]
-        contexts[namespace][context_name] = Context.new(block, owner, context_name, namespace, silent)
+        if contexts[namespace][context_name]
+          warn("Overriding an existing context: #{context_name}@#{namespace}")
+        end
+        contexts[namespace][context_name] = Context.new(
+          block,
+          owner,
+          context_name,
+          namespace,
+          silent,
+        )
       end
 
       # Find a context.
@@ -62,20 +86,25 @@ module RspecInContext
         if namespace&.present?
           contexts[namespace][context_name]
         else
-          contexts[GLOBAL_CONTEXT][context_name] || find_context_in_any_namespace(context_name)
-        end || (raise NoContextFound, "No context found with name #{context_name}")
+          contexts[GLOBAL_CONTEXT][context_name] ||
+            find_context_in_any_namespace(context_name)
+        end ||
+          (raise NoContextFound, "No context found with name #{context_name}")
       end
 
       # Look into every namespace to find the context
       # @api private
       # @raise [AmbiguousContextName] if multiple namespaces contain the same context name
       def find_context_in_any_namespace(context_name)
-        matching_namespaces = contexts.select { |_, namespaced_contexts| namespaced_contexts[context_name] }
+        matching_namespaces =
+          contexts.select do |_, namespaced_contexts|
+            namespaced_contexts[context_name]
+          end
         if matching_namespaces.size > 1
-          namespace_names = matching_namespaces.keys.join(', ')
+          namespace_names = matching_namespaces.keys.join(", ")
           raise AmbiguousContextName,
                 "Context '#{context_name}' exists in multiple namespaces (#{namespace_names}). " \
-                  'Please specify a namespace.'
+                  "Please specify a namespace."
         end
         matching_namespaces.values.first&.[](context_name)
       end
@@ -84,7 +113,9 @@ module RspecInContext
       # Delete a context
       def remove_context(current_class)
         contexts.each_value do |namespaced_contexts|
-          namespaced_contexts.delete_if { |_, context| context.owner == current_class }
+          namespaced_contexts.delete_if do |_, context|
+            context.owner == current_class
+          end
         end
       end
 
@@ -113,7 +144,9 @@ module RspecInContext
           if context_to_exec.silent
             context { instance_exec(*args, &context_to_exec.block) }
           else
-            context(context_name.to_s) { instance_exec(*args, &context_to_exec.block) }
+            context(
+              context_name.to_s,
+            ) { instance_exec(*args, &context_to_exec.block) }
           end
         ensure
           Thread.current[:test_block_stack].pop
@@ -142,11 +175,24 @@ module RspecInContext
       # @param print_context [Boolean] Reverse alias of silent
       #
       # @note contexts are scoped to the block they are defined in.
-      def define_context(context_name, namespace: nil, ns: nil, silent: true, print_context: nil, &block)
+      def define_context(
+        context_name,
+        namespace: nil,
+        ns: nil,
+        silent: true,
+        print_context: nil,
+        &block
+      )
         namespace ||= ns
         silent = !print_context unless print_context.nil?
         instance_exec do
-          InContext.add_context(context_name, hooks.instance_variable_get(:@owner), namespace, silent, &block)
+          InContext.add_context(
+            context_name,
+            hooks.instance_variable_get(:@owner),
+            namespace,
+            silent,
+            &block
+          )
         end
       end
     end
