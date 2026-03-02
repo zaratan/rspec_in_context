@@ -2,6 +2,30 @@
 
 Issues identified during an exhaustive critical review of the codebase.
 
+---
+
+## PR #21 Review Comments (Copilot)
+
+### ✅ 1. Stack leak if `find_context` raises
+
+`in_context` pushed onto `Thread.current[:test_block_stack]` before calling `find_context`, but the `ensure` that pops started after. If `find_context` raised (e.g., `NoContextFound`), the stack entry would leak.
+
+**Status**: FIXED — moved `find_context` call before the `push`.
+
+### ✅ 2. Indentation of `spec.metadata` in gemspec
+
+The `spec.metadata[...]` line was not indented like the rest of the `Gem::Specification` block.
+
+**Status**: FIXED by prettier.
+
+### ⏸️ 3. `.ruby-version` 4.0.1 vs CI matrix
+
+`.ruby-version` is set to `4.0.1`, but CI tests Ruby 3.2/3.3/3.4/head. This could cause contributors to develop against a version not fully covered by CI.
+
+**Status**: DEFERRED — `head` in CI covers Ruby 4.0.x. The `.ruby-version` file is for local development only. Consider aligning if it causes contributor confusion.
+
+---
+
 ## CRITICAL
 
 ### 1. Add a Mutex around @contexts
