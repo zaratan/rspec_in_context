@@ -32,7 +32,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit", "> 0.6.0"
-  spec.add_development_dependency "faker", "> 1.8"
+
   spec.add_development_dependency "guard-rspec", "> 4.7"
   spec.add_development_dependency "overcommit", "> 0.46"
   spec.add_development_dependency "prettier"

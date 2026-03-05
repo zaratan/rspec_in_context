@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require "simplecov"
-require "faker"
 
 SimpleCov.at_exit do
   SimpleCov.result.format!

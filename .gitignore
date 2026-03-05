@@ -10,6 +10,9 @@
 Gemfile.lock
 vendor/cache
 
+# Rubocop remote config cache
+.rubocop-remote-*.yml
+
 # Claude Code
 CLAUDE.md
 .claude/

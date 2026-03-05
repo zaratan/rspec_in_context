@@ -1,125 +1,100 @@
-# TODO — Architectural Review
+# TODO
 
-Issues identified during an exhaustive critical review of the codebase.
+Issues identified during review of the codebase and PR #21.
 
----
+## PR #21 — Resolved
 
-## PR #21 Review Comments (Copilot)
+- [x] Stack leak if `find_context` raises — moved `find_context` before `push`
+- [x] Indentation of `spec.metadata` in gemspec — fixed by prettier
+- [ ] `.ruby-version` 4.0.1 vs CI matrix — `head` covers it, revisit if contributor confusion arises
 
-### ✅ 1. Stack leak if `find_context` raises
+## P0 — Before merge
 
-`in_context` pushed onto `Thread.current[:test_block_stack]` before calling `find_context`, but the `ensure` that pops started after. If `find_context` raised (e.g., `NoContextFound`), the stack entry would leak.
+- [x] Quote prettier globs in CI — quoted `'lib/**/*.rb'` etc. in both workflow files
+- [x] Gitignore `.rubocop-remote-*.yml` — added pattern to `.gitignore`
 
-**Status**: FIXED — moved `find_context` call before the `push`.
+## P1 — Réduction des dépendances
 
-### ✅ 2. Indentation of `spec.metadata` in gemspec
+### Retirer `active_support/all`
 
-The `spec.metadata[...]` line was not indented like the rest of the `Gem::Specification` block.
+`require "active_support/all"` charge la totalité d'ActiveSupport pour deux usages :
+- `HashWithIndifferentAccess` — remplaçable par un `Hash` classique avec `.to_s` sur les clés
+- `namespace&.present?` — remplaçable par `namespace && !namespace.to_s.strip.empty?`
 
-**Status**: FIXED by prettier.
-
-### ⏸️ 3. `.ruby-version` 4.0.1 vs CI matrix
-
-`.ruby-version` is set to `4.0.1`, but CI tests Ruby 3.2/3.3/3.4/head. This could cause contributors to develop against a version not fully covered by CI.
-
-**Status**: DEFERRED — `head` in CI covers Ruby 4.0.x. The `.ruby-version` file is for local development only. Consider aligning if it causes contributor confusion.
-
----
-
-## CRITICAL
-
-### 1. Add a Mutex around @contexts
-
-The `@contexts` registry is a shared mutable global state with no synchronization. `add_context`, `remove_context`, `find_context` all read and write without a mutex. With `parallel_tests` in thread mode, this is a guaranteed race condition.
-
-**Solution**: Add a `Mutex` around all operations on `@contexts`, or use `Concurrent::Map`.
-
-**File**: `lib/rspec_in_context/in_context.rb`
-
-### 2. Secure access to hooks.instance_variable_get(:@owner)
-
-Accessing a private RSpec internal instance variable. If it disappears in a future version, `owner` will be `nil` and scoped contexts will never be cleaned up (silently).
-
-**Solution**: Add a smoke test verifying `@owner` is not nil. Investigate whether `self` or `self.class` could serve as a substitute.
-
-**File**: `lib/rspec_in_context/in_context.rb:191`
-
-### 3. Secure the prepend on RSpec::Core::ExampleGroup.subclass
-
-The `subclass(parent, description, args, registration_collection, &)` signature mirrors RSpec's internal implementation. The `"> 3.0"` version constraint is too loose for this level of coupling.
-
-**Solution**: Restrict to `"~> 3.0"` and add a smoke test. Investigate whether a public RSpec hook (`after(:context)` or similar) could replace the prepend.
-
-**Files**: `lib/rspec_in_context/context_management.rb`, `rspec_in_context.gemspec`
-
-## MAJOR
-
-### 4. Remove the ActiveSupport dependency
-
-`require "active_support/all"` loads ALL of ActiveSupport for only:
-- `HashWithIndifferentAccess`
-- A single `present?` call (`namespace&.present?`)
-
-`present?` → `namespace && !namespace.to_s.strip.empty?`
-`HashWithIndifferentAccess` → plain Hash with `.to_s` on keys.
+C'est une dépendance lourde pour une gem de test. La retirer réduirait significativement le temps de chargement.
 
 **Files**: `lib/rspec_in_context.rb`, `lib/rspec_in_context/in_context.rb`, `rspec_in_context.gemspec`
 
-### 5. Fix typo instanciate_context → instantiate_context
+- [x] Retirer `faker` — retiré de `spec_helper.rb` et `rspec_in_context.gemspec`
 
-Gallicism in the public API. The correct English word is `instantiate`.
+## P1 — Robustesse face aux internals RSpec
 
-**Solution**: Add `alias instantiate_context execute_tests` alongside the old one. Keep the old alias with a deprecation warning.
+### Sécuriser `hooks.instance_variable_get(:@owner)`
 
-**File**: `lib/rspec_in_context/in_context.rb`
+Accès direct à une variable d'instance privée de RSpec. Si elle disparaît dans une future version, `owner` sera `nil` et les contextes scopés ne seront jamais nettoyés (silencieusement).
 
-### 6. Improve tests to verify actual block execution
+Ajouter un smoke test vérifiant que `@owner` n'est pas nil. Investiguer si `self` ou `self.class` pourrait servir de substitut.
 
-Many tests use `expect(true).to be_truthy` which does not verify the block was actually executed. If the block is not injected, the test is simply absent from the suite — no failure.
+**File**: `lib/rspec_in_context/in_context.rb:191`
 
-**Solution**: Use measurable side effects (counters, shared variables) to verify blocks are actually executed.
+### Sécuriser le prepend sur `RSpec::Core::ExampleGroup.subclass`
 
-**Files**: `spec/rspec_in_context/in_context_spec.rb`, `spec/rspec_in_context/context_management_spec.rb`
+La signature `subclass(parent, description, args, registration_collection, &)` mirror l'implémentation interne de RSpec. La contrainte `"> 3.0"` est trop large pour ce niveau de couplage.
 
-### 7. Add clear_all_contexts! for memory cleanup
+Restreindre à `"~> 3.0"` et ajouter un smoke test. Investiguer si un hook public RSpec (`after(:context)` ou similaire) pourrait remplacer le prepend.
 
-Global contexts (owner nil) are never freed. For long test suites with dynamically generated contexts, procs and their closures accumulate.
+**Files**: `lib/rspec_in_context/context_management.rb`, `rspec_in_context.gemspec`
 
-**Solution**: Add `RspecInContext::InContext.clear_all_contexts!` and optionally call it in `after(:suite)`.
+### Resserrer les contraintes de version des dépendances
 
-**File**: `lib/rspec_in_context/in_context.rb`
-
-### 8. Tighten dependency version constraints
-
-`activesupport "> 2.0"` and `rspec "> 3.0"` have no upper bound. Use `"~>"` for main dependencies. Update rake to `"~> 13.0"`.
+`activesupport "> 2.0"` et `rspec "> 3.0"` n'ont pas de borne supérieure. Tant qu'ActiveSupport est une dépendance, utiliser `"~> 7.0"` (ou la version minimale réellement supportée). Utiliser `"~> 3.0"` pour rspec. Mettre à jour rake vers `"~> 13.0"`.
 
 **File**: `rspec_in_context.gemspec`
 
-## MINOR
+## P2 — Qualité de l'API
 
-### 9. Add a base exception class RspecInContext::Error
+- [x] Ajouter `RspecInContext::Error` comme classe de base — `NoContextFound` et `AmbiguousContextName` en héritent
+- [x] Retirer le `instance_exec` inutile dans `define_context`
+- [x] Corriger les typos dans les commentaires (`find` → `found`, `overriden` → `overridden`, `colisions` → `collisions`)
 
-Cannot `rescue RspecInContext::Error` to catch all gem errors. Add `class Error < StandardError; end` and have `NoContextFound` and `AmbiguousContextName` inherit from it.
+### Corriger le gallicisme `instanciate_context`
+
+Le mot correct en anglais est `instantiate`. Ajouter `alias instantiate_context execute_tests` et déprécier l'ancien alias avec un warning.
+
+**File**: `lib/rspec_in_context/in_context.rb`
+
+## P2 — Tests
+
+### Renforcer les tests `expect(true).to be_truthy`
+
+Beaucoup de tests utilisent `expect(true).to be_truthy` ce qui ne vérifie pas que le bloc a réellement été exécuté. Si le bloc n'est pas injecté, le `it` est simplement absent de la suite — aucun échec. Utiliser des effets de bord mesurables (compteurs, variables partagées) ou vérifier le nombre d'exemples exécutés.
+
+**Files**: `spec/rspec_in_context/in_context_spec.rb`, `spec/rspec_in_context/context_management_spec.rb`
+
+### Vérifier la sémantique de `test_inexisting_context`
+
+Le refactoring appelle `self.class.in_context(...)` à l'intérieur d'un `it` (runtime) au lieu du niveau `describe` (definition-time). `in_context` est conçu pour être appelé au niveau `describe`. L'erreur sera levée dans les deux cas via `find_context`, mais le chemin de code est différent. Vérifier que c'est bien l'intention.
+
+**File**: `spec/support/context_test_helper.rb`
+
+## P3 — Nice to have
+
+### Ajouter `clear_all_contexts!` pour le nettoyage mémoire
+
+Les contextes globaux (owner nil) ne sont jamais libérés. Pour les suites de tests longues avec des contextes générés dynamiquement, les procs et leurs closures s'accumulent.
 
 **File**: `lib/rspec_in_context/in_context.rb`
 
-### 10. Remove useless instance_exec in define_context
+### Ajouter un Mutex autour de `@contexts`
 
-The `instance_exec do ... end` wrapper in `define_context` (ClassMethods) does nothing since `hooks` is already accessible directly in the class context.
-
-**File**: `lib/rspec_in_context/in_context.rb:188-196`
-
-### 11. Remove faker from dependencies
-
-`faker` is required in `spec_helper.rb` but never used in any test. Dead code.
-
-**Files**: `spec/spec_helper.rb`, `rspec_in_context.gemspec`
-
-## COSMETIC
-
-### 12. Fix typos in code comments
-
-- "find" → "found", "eventualy" → "eventually" (line 5 in_context.rb)
-- "colisions" → "collisions" (namespace comment)
+Le registre `@contexts` est un état mutable global partagé sans synchronisation. Avec `parallel_tests` en mode thread, c'est une race condition. En mode process (le plus courant), pas de risque. À faire si des utilisateurs rapportent des problèmes en mode thread.
 
 **File**: `lib/rspec_in_context/in_context.rb`
+
+- [x] Corriger les typos restantes dans les commentaires — fait avec les fixes P2
+
+### Section migration dans le README
+
+Les utilisateurs upgrading de 1.1.x à 1.2.0 bénéficieraient d'une section expliquant les breaking changes (`AmbiguousContextName`, Ruby >= 3.2).
+
+**File**: `README.md`

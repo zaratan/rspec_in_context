@@ -2,8 +2,12 @@
 
 # Base module
 module RspecInContext
-  # Error type when no context is find from its name (and eventually namespace)
-  class NoContextFound < StandardError
+  # Base error class for all gem errors
+  class Error < StandardError
+  end
+
+  # Error type when no context is found from its name (and eventually namespace)
+  class NoContextFound < Error
   end
 
   # Error type when define_context is called without a block
@@ -15,13 +19,13 @@ module RspecInContext
   end
 
   # Error type when multiple namespaces contain a context with the same name
-  class AmbiguousContextName < StandardError
+  class AmbiguousContextName < Error
   end
 
   # Context struct
   # @attr [Proc] block what will be executed in the test context
   # @attr [Class] owner current rspec context class. This will be used to know where a define_context has been defined
-  # @attr [String | Symbol] name represent the name by which the context can be find.
+  # @attr [String | Symbol] name represent the name by which the context can be found.
   # @attr [String | Symbol] namespace namespace for context names to avoid collisions
   # @attr [Boolean] silent does the in_context wrap itself into a context with its name or an anonymous context
   Context = Struct.new(:block, :owner, :name, :namespace, :silent)
@@ -49,7 +53,7 @@ module RspecInContext
       # Meta method to add a new context
       # @api private
       #
-      # @note Will warn if a context is overriden
+      # @note Will warn if a context is overridden
       # @raise [InvalidContextName] if context_name is nil or empty
       # @raise [MissingDefinitionBlock] if no block is provided
       def add_context(
@@ -168,7 +172,7 @@ module RspecInContext
       #
       # @param context_name [String, Symbol] The name of the context that will be re-used later
       # @param namespace [String, Symbol] namespace name where the context will be stored.
-      #   It helps reducing colisions when you define "global" contexts
+      #   It helps reducing collisions when you define "global" contexts
       # @param ns [String, Symbol] Alias of namespace
       # @param block [Proc] Contain the code that will be injected with #in_context later
       # @param silent [Boolean] Does the in_context wrap itself into a context with its name or an anonymous context
@@ -185,15 +189,13 @@ module RspecInContext
       )
         namespace ||= ns
         silent = !print_context unless print_context.nil?
-        instance_exec do
-          InContext.add_context(
-            context_name,
-            hooks.instance_variable_get(:@owner),
-            namespace,
-            silent,
-            &block
-          )
-        end
+        InContext.add_context(
+          context_name,
+          hooks.instance_variable_get(:@owner),
+          namespace,
+          silent,
+          &block
+        )
       end
     end
   end
