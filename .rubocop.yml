@@ -38,6 +38,10 @@ Style/OptionalBooleanParameter:
 Style/GuardClause:
   Enabled: false
 
+# We legitimately reopen RSpec in multiple files and define separate helper modules
+Style/OneClassPerFile:
+  Enabled: false
+
 ### End Prettier
 Naming/MethodParameterName:
   Enabled: false
