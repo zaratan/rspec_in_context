@@ -93,7 +93,7 @@ end
 # 1. Did in_context create a new child ExampleGroup? (catches broken in_context)
 # 2. If a block was passed, did execute_tests consume it? (catches broken execute_tests)
 module InContextDeliveryCheck
-  def in_context(context_name, *args, namespace: nil, ns: nil, &block)
+  def in_context(context_name, *, namespace: nil, ns: nil, &block)
     children_before = children.size
 
     if block
@@ -103,13 +103,7 @@ module InContextDeliveryCheck
           consumed = true
           instance_exec(*blk_args, &block)
         end
-      super(
-        context_name,
-        *args,
-        namespace: namespace,
-        ns: ns,
-        &wrapped_block
-      )
+      super(context_name, *, namespace: namespace, ns: ns, &wrapped_block)
 
       unless consumed
         BlockDeliveryGuard.failures << {

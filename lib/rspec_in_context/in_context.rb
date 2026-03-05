@@ -57,9 +57,7 @@ module RspecInContext
       # Useful for memory cleanup in long-running test suites with
       # dynamically generated contexts.
       def clear_all_contexts!
-        @contexts_mutex.synchronize do
-          @contexts = nil
-        end
+        @contexts_mutex.synchronize { @contexts = nil }
       end
 
       # Meta method to add a new context
@@ -212,7 +210,7 @@ module RspecInContext
         ns: nil,
         silent: true,
         print_context: nil,
-        &block
+        &
       )
         namespace ||= ns
         silent = !print_context unless print_context.nil?
@@ -221,7 +219,7 @@ module RspecInContext
           hooks.instance_variable_get(:@owner),
           namespace,
           silent,
-          &block
+          &
         )
       end
     end

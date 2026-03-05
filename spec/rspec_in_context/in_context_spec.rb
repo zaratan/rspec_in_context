@@ -220,9 +220,9 @@ describe RspecInContext::InContext do
     end
 
     it "emits a deprecation warning" do
-      expect do
-        self.class.instanciate_context
-      end.to output(/DEPRECATION.*instanciate_context.*deprecated/).to_stderr
+      expect { self.class.instanciate_context }.to output(
+        /DEPRECATION.*instanciate_context.*deprecated/,
+      ).to_stderr
     end
   end
 
@@ -439,9 +439,7 @@ describe RspecInContext::InContext do
         it("works") { expect(true).to be_truthy }
       end
 
-      expect(
-        RspecInContext::InContext.find_context(unique_name),
-      ).not_to be_nil
+      expect(RspecInContext::InContext.find_context(unique_name)).not_to be_nil
 
       RspecInContext::InContext.clear_all_contexts!
 

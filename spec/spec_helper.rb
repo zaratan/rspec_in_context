@@ -125,8 +125,10 @@ RSpec.configure do |config|
     grouped = BlockDeliveryGuard.failures.group_by { |f| f[:type] }
 
     labels = {
-      no_group_created: "in_context calls that created no ExampleGroup (in_context broken):",
-      empty_group: "in_context calls that produced zero examples (context block not injected):",
+      no_group_created:
+        "in_context calls that created no ExampleGroup (in_context broken):",
+      empty_group:
+        "in_context calls that produced zero examples (context block not injected):",
       block_not_consumed: "in_context blocks never consumed by execute_tests:",
     }
     messages = []
@@ -139,7 +141,7 @@ RSpec.configure do |config|
       end
     end
 
-    $stderr.puts("\n\nBLOCK DELIVERY GUARD:\n#{messages.join("\n")}\n\n")
+    warn("\n\nBLOCK DELIVERY GUARD:\n#{messages.join("\n")}\n\n")
     exit(1)
   end
 end
