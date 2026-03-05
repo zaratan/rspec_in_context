@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 describe RspecInContext::ContextManagement do
   describe "within a describe block" do
     define_context "simple describe test" do

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require "securerandom"
 
 RSpec.define_context "outside in_context" do

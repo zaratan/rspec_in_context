@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require "simplecov"
 
 SimpleCov.at_exit do

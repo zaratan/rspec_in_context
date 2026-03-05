@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 module RspecInContext
   # Allow context to be scoped inside a block
   module ContextManagement
