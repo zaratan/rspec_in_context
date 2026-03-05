@@ -42,6 +42,10 @@ Style/GuardClause:
 Style/OneClassPerFile:
   Enabled: false
 
+# Ruby >= 3.2 required, frozen string literal comment is unnecessary noise
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
 ### End Prettier
 Naming/MethodParameterName:
   Enabled: false

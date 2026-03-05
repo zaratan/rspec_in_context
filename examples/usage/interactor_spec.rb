@@ -6,7 +6,9 @@
 require "rails_helper"
 
 RSpec.describe CreateInvoice do
-  subject { described_class.call(amount: amount, client: client, due_date: due_date) }
+  subject do
+    described_class.call(amount: amount, client: client, due_date: due_date)
+  end
 
   let(:amount) { 100 }
   let(:client) { create(:client) }

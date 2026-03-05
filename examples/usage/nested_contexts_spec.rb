@@ -21,8 +21,9 @@ RSpec.describe PasswordReset do
 
         PasswordReset.call(user)
 
-        expect(ActionMailer::Base.deliveries.last.body.to_s)
-          .to include(Time.current.iso8601)
+        expect(ActionMailer::Base.deliveries.last.body.to_s).to include(
+          Time.current.iso8601,
+        )
       end
     end
   end

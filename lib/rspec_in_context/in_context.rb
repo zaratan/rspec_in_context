@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 # Base module
 module RspecInContext
   # Base error class for all gem errors

@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 # Verifies that a context is no longer accessible (has been scoped out).
 # Calls in_context at runtime (inside an `it` block) rather than at
 # definition time. This is intentional: find_context is the first thing
