@@ -324,6 +324,15 @@ execute_tests
 instantiate_context
 ```
 
+## Real-World Examples
+
+The `examples/` directory in the repository contains real-world usage patterns:
+
+- `examples/contexts/` — Context definitions (authentication, interactor contracts, frozen time, job setup, mailer, composed contexts)
+- `examples/usage/` — Spec files showing how to use those contexts in practice
+
+See `examples/README.md` for the full list.
+
 ## Complete Example
 
 Showing multiple features together:
