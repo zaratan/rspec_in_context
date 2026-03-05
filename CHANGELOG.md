@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-03-05
+### Added
+- `LLMS.md` — comprehensive API reference for LLMs
+- `examples/` directory with real-world usage patterns (contexts and specs)
+
+### Changed
+- Complete rewrite of `README.md` with better structure, real-world examples, and comparison with `shared_examples`
+
 ## [1.2.0] - 2026-01-27
 ### Breaking
 - **BREAKING** Minimum Ruby version is now 3.2
@@ -53,7 +61,8 @@ This is a release in order to test all type of actions
 - Changelog
 - Support ruby 3.0
 
-[Unreleased]: https://github.com/zaratan/rspec_in_context/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/zaratan/rspec_in_context/compare/v1.2.1...HEAD
+[1.2.1]: https://github.com/zaratan/rspec_in_context/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/zaratan/rspec_in_context/compare/v1.1.0.3...v1.2.0
 [1.1.0.3]: https://github.com/zaratan/rspec_in_context/compare/v1.1.0.2...v1.1.0.3
 [1.1.0.2]: https://github.com/zaratan/rspec_in_context/compare/v1.1.0.1...v1.1.0.2
