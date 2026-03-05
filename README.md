@@ -114,8 +114,10 @@ end
 
 * You can add variable instantiation relative to your test where you exactly want:
 
-`instanciate_context` is an alias of `execute_tests` so you can't use both.
-But it let you describe what the block will do better.
+`instantiate_context` is an alias of `execute_tests` so you can't use both.
+But it lets you describe what the block will do better.
+
+> **Note**: The old spelling `instanciate_context` still works but is deprecated and will emit a warning.
 
 #### Variable usage
 
@@ -266,6 +268,24 @@ RSpec.describe MyNiceClass do
 end
 ```
 Will print "MyNiceClass with my_var defined works" and "MyNiceClass without my_var defined doesn't work". Which is valid and readable documentation.
+
+## Migrating to 1.2.0
+
+### Breaking changes
+
+- **Ruby >= 3.2 required.** Older Rubies are no longer supported.
+- **`AmbiguousContextName` error.** If the same context name exists in multiple namespaces and you call `in_context` without specifying a namespace, `AmbiguousContextName` is now raised instead of silently picking one. Fix: add `ns:` to disambiguate.
+- **`ActiveSupport` removed.** The gem no longer depends on `activesupport`. This should be transparent, but if you were relying on `HashWithIndifferentAccess` behavior from the gem's internals, note that contexts are now stored in a plain `Hash` with string-normalized keys (symbols and strings still work interchangeably).
+
+### Deprecations
+
+- **`instanciate_context`** is deprecated (typo). Use `instantiate_context` or `execute_tests` instead. The old method still works but emits a warning to `$stderr`.
+
+### New features
+
+- **Input validation**: `define_context` now raises `InvalidContextName` (nil/empty name) and `MissingDefinitionBlock` (no block).
+- **`clear_all_contexts!`**: Call `RspecInContext::InContext.clear_all_contexts!` to free all stored contexts for memory cleanup in long-running suites.
+- **Thread-safety**: The context registry is now protected by a Mutex for `parallel_tests` in thread mode.
 
 ## Development
 

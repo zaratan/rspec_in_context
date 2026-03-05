@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# Not using in_context here because we want to be sure we are no hiding a bug.
+# Verifies that a context is no longer accessible (has been scoped out).
+# Calls in_context at runtime (inside an `it` block) rather than at
+# definition time. This is intentional: find_context is the first thing
+# in_context does, so NoContextFound is raised regardless of call site.
 module ContextTestHelper
   def test_inexisting_context(
     context_name,

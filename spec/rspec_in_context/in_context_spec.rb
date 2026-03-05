@@ -67,13 +67,13 @@ describe RspecInContext::InContext do
     end
   end
 
-  define_context "with instanciate block" do
+  define_context "with instantiate block" do
     it "doesn't find unexistant variable" do
       expect(defined?(new_var)).to be_falsy
     end
 
-    context "with variable instanciated" do
-      instanciate_context
+    context "with variable instantiated" do
+      instantiate_context
 
       it "works with another variable" do
         expect(another_var).to eq(:value)
@@ -203,13 +203,27 @@ describe RspecInContext::InContext do
     in_context "context with multiple arguments", :first, :second, :third
 
     define_context :context_defined_with_symbol do
-      it "works when defined with symbol" do
-        expect(true).to be_truthy
+      let(:symbol_proof) { :from_symbol_context }
+
+      it "is reachable when defined with symbol" do
+        expect(symbol_proof).to eq(:from_symbol_context)
       end
     end
 
     in_context :context_defined_with_symbol
     in_context "context_defined_with_symbol" # Also works with string
+  end
+
+  describe "deprecated instanciate_context" do
+    define_context "deprecation test" do
+      execute_tests
+    end
+
+    it "emits a deprecation warning" do
+      expect do
+        self.class.instanciate_context
+      end.to output(/DEPRECATION.*instanciate_context.*deprecated/).to_stderr
+    end
   end
 
   describe "in_context calls" do
@@ -223,7 +237,7 @@ describe RspecInContext::InContext do
       end
     end
 
-    in_context "with instanciate block" do
+    in_context "with instantiate block" do
       let(:another_var) { :value }
     end
 
@@ -411,6 +425,37 @@ describe RspecInContext::InContext do
     end
     test_inexisting_context "isolated namespaced"
     test_inexisting_context "isolated namespaced", ns: :isolated
+  end
+
+  describe "clear_all_contexts!" do
+    it "removes all stored contexts and allows re-creation" do
+      # Save current state (preserve the default block by copying into a new Hash with the same default)
+      original = RspecInContext::InContext.contexts
+      saved = Hash.new { |hash, key| hash[key.to_s] = {} }
+      original.each { |k, v| saved[k] = v.dup }
+
+      unique_name = "clearable_#{SecureRandom.hex(8)}"
+      RSpec.define_context(unique_name) do
+        it("works") { expect(true).to be_truthy }
+      end
+
+      expect(
+        RspecInContext::InContext.find_context(unique_name),
+      ).not_to be_nil
+
+      RspecInContext::InContext.clear_all_contexts!
+
+      # After clear, the context should no longer exist
+      expect do
+        RspecInContext::InContext.find_context(unique_name)
+      end.to raise_error(RspecInContext::NoContextFound)
+
+      # contexts should return a fresh empty hash
+      expect(RspecInContext::InContext.contexts).to be_empty
+    ensure
+      # Restore previous state so other tests aren't affected
+      RspecInContext::InContext.instance_variable_set(:@contexts, saved)
+    end
   end
 
   describe "RSpec internals smoke tests" do

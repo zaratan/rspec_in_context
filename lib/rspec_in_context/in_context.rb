@@ -34,6 +34,9 @@ module RspecInContext
   module InContext
     # Name of the Global context
     GLOBAL_CONTEXT = :global_context
+    # Mutex protecting @contexts for thread-safety (e.g. parallel_tests in thread mode)
+    @contexts_mutex = Mutex.new
+
     class << self
       # Hook for easier inclusion of the gem in RSpec
       # @api private
@@ -45,7 +48,18 @@ module RspecInContext
       # Keys are normalized to strings so symbols and strings are interchangeable.
       # @api private
       def contexts
-        @contexts ||= Hash.new { |hash, key| hash[key.to_s] = {} }
+        @contexts_mutex.synchronize do
+          @contexts ||= Hash.new { |hash, key| hash[key.to_s] = {} }
+        end
+      end
+
+      # Remove all stored contexts (both scoped and global).
+      # Useful for memory cleanup in long-running test suites with
+      # dynamically generated contexts.
+      def clear_all_contexts!
+        @contexts_mutex.synchronize do
+          @contexts = nil
+        end
       end
 
       # Meta method to add a new context
@@ -164,14 +178,22 @@ module RspecInContext
 
       # Used in context definition
       # Place where you want to re-inject code passed in argument of in_context
-      #
-      # For convenience and readability, a `instanciate_context` alias have been defined
       # (for more examples look at tests)
       def execute_tests
         current_block = Thread.current[:test_block_stack]&.last
         instance_exec(&current_block) if current_block
       end
-      alias instanciate_context execute_tests
+      alias instantiate_context execute_tests
+
+      # @deprecated Use {#instantiate_context} or {#execute_tests} instead
+      def instanciate_context
+        warn(
+          "DEPRECATION: `instanciate_context` is deprecated due to a typo. " \
+            "Use `instantiate_context` or `execute_tests` instead.",
+          uplevel: 1,
+        )
+        execute_tests
+      end
 
       # Let you define a context that can be reused later
       #

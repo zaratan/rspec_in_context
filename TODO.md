@@ -29,45 +29,16 @@ Issues identified during review of the codebase and PR #21.
 - [x] Ajouter `RspecInContext::Error` comme classe de base — `NoContextFound` et `AmbiguousContextName` en héritent
 - [x] Retirer le `instance_exec` inutile dans `define_context`
 - [x] Corriger les typos dans les commentaires (`find` → `found`, `overriden` → `overridden`, `colisions` → `collisions`)
-
-### Corriger le gallicisme `instanciate_context`
-
-Le mot correct en anglais est `instantiate`. Ajouter `alias instantiate_context execute_tests` et déprécier l'ancien alias avec un warning.
-
-**File**: `lib/rspec_in_context/in_context.rb`
+- [x] Corriger `instanciate_context` — ajouté `instantiate_context` comme alias principal, l'ancien émet un deprecation warning
 
 ## P2 — Tests
 
-### Renforcer les tests `expect(true).to be_truthy`
-
-Beaucoup de tests utilisent `expect(true).to be_truthy` ce qui ne vérifie pas que le bloc a réellement été exécuté. Si le bloc n'est pas injecté, le `it` est simplement absent de la suite — aucun échec. Utiliser des effets de bord mesurables (compteurs, variables partagées) ou vérifier le nombre d'exemples exécutés.
-
-**Files**: `spec/rspec_in_context/in_context_spec.rb`, `spec/rspec_in_context/context_management_spec.rb`
-
-### Vérifier la sémantique de `test_inexisting_context`
-
-Le refactoring appelle `self.class.in_context(...)` à l'intérieur d'un `it` (runtime) au lieu du niveau `describe` (definition-time). `in_context` est conçu pour être appelé au niveau `describe`. L'erreur sera levée dans les deux cas via `find_context`, mais le chemin de code est différent. Vérifier que c'est bien l'intention.
-
-**File**: `spec/support/context_test_helper.rb`
+- [x] Renforcer les tests — block delivery guard dynamique (voir `spec/support/block_delivery_guard.rb`) détecte les blocs non-consommés et les groupes vides. Les `expect(true).to be_truthy` restants sont acceptables car le guard couvre la disparition silencieuse.
+- [x] Sémantique de `test_inexisting_context` — vérifiée et documentée. Appelle `find_context` au runtime, qui est la première opération de `in_context`. Le comportement est identique.
 
 ## P3 — Nice to have
 
-### Ajouter `clear_all_contexts!` pour le nettoyage mémoire
-
-Les contextes globaux (owner nil) ne sont jamais libérés. Pour les suites de tests longues avec des contextes générés dynamiquement, les procs et leurs closures s'accumulent.
-
-**File**: `lib/rspec_in_context/in_context.rb`
-
-### Ajouter un Mutex autour de `@contexts`
-
-Le registre `@contexts` est un état mutable global partagé sans synchronisation. Avec `parallel_tests` en mode thread, c'est une race condition. En mode process (le plus courant), pas de risque. À faire si des utilisateurs rapportent des problèmes en mode thread.
-
-**File**: `lib/rspec_in_context/in_context.rb`
-
+- [x] Ajouter `clear_all_contexts!` pour le nettoyage mémoire — `RspecInContext::InContext.clear_all_contexts!` réinitialise le registre. Test ajouté avec sauvegarde/restauration du state.
+- [x] Ajouter un Mutex autour de `@contexts` — `@contexts_mutex` protège l'initialisation et le clear. Thread-safe pour `parallel_tests` en mode thread.
 - [x] Corriger les typos restantes dans les commentaires — fait avec les fixes P2
-
-### Section migration dans le README
-
-Les utilisateurs upgrading de 1.1.x à 1.2.0 bénéficieraient d'une section expliquant les breaking changes (`AmbiguousContextName`, Ruby >= 3.2).
-
-**File**: `README.md`
+- [x] Section migration dans le README — section "Migrating to 1.2.0" ajoutée avec breaking changes, deprecations, et nouvelles features. Mise à jour de la mention `instanciate_context` → `instantiate_context`.

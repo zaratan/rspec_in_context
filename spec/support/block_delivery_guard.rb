@@ -9,7 +9,7 @@
 # ## Problem 1: execute_tests is broken
 #
 # When using `in_context` with a block, that block is injected into the
-# context definition via `execute_tests` / `instanciate_context`. If
+# context definition via `execute_tests` / `instantiate_context`. If
 # `execute_tests` is broken (e.g., thread-local stack corruption), the
 # block is never evaluated. The `it` blocks inside are never registered
 # with RSpec. The suite passes with fewer examples — no failure, no warning.
