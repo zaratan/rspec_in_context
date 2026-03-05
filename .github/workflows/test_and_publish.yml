@@ -2,18 +2,18 @@ name: Test and Release
 
 on:
   push:
-    branches: 
+    branches:
       - main
 
 jobs:
   tests:
     strategy:
       matrix:
-        ruby: [2.5, 2.6, 2.7, 3.0]
+        ruby: ['3.2', '3.3', '3.4', '4.0']
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -26,25 +26,30 @@ jobs:
   prettier:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Node
-      uses: actions/setup-node@v2
+    - uses: actions/checkout@v4
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
       with:
-        node-version: '14'
+        ruby-version: '3.4'
+        bundler-cache: true
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
     - name: Install yarn dep
       run: yarn install
     - name: Check prettier
-      run: yarn prettier -c '**/*.rb' 
+      run: yarn prettier -c 'lib/**/*.rb' 'spec/**/*.rb' '*.gemspec' Gemfile
   release:
     needs: [tests, prettier]
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: 3.0
+        ruby-version: '3.4'
         bundler-cache: true
     - name: Prepare credentials
       env:
@@ -55,4 +60,4 @@ jobs:
     - name: Fetch tags from remote
       run: "git fetch -t"
     - name: Publish if version change
-      run: 'git diff `git tag | tail -1` -- lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" && rake release || echo "No release for now"'
+      run: 'git diff $(git tag --sort=-v:refname | head -1) -- lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" && rake release || echo "No release for now"'

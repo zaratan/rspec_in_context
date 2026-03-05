@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Fetch main branch
         run: git fetch origin main:main
       - name: Verify if there's a change in version
@@ -18,4 +18,8 @@ jobs:
       - name: Print new version
         run: 'git diff main -- lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?"'
       - name: Verify if higher version
-        run: '[[ $(git diff main -- lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?") > $(git diff main -- lib/rspec_in_context/version.rb | grep -E "^-.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?") ]]'
+        run: |
+          NEW_VERSION=$(git diff main -- lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?")
+          OLD_VERSION=$(git diff main -- lib/rspec_in_context/version.rb | grep -E "^-.*VERSION" | grep -E -o "[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?")
+          HIGHEST=$(echo -e "$OLD_VERSION\n$NEW_VERSION" | sort -V | tail -1)
+          [[ "$HIGHEST" == "$NEW_VERSION" && "$OLD_VERSION" != "$NEW_VERSION" ]]

@@ -1,24 +1,27 @@
 # frozen_string_literal: true
 
-# Not using in_context here because we want to be sure we are no hidding a bug.
+# Verifies that a context is no longer accessible (has been scoped out).
+# Calls in_context at runtime (inside an `it` block) rather than at
+# definition time. This is intentional: find_context is the first thing
+# in_context does, so NoContextFound is raised regardless of call site.
 module ContextTestHelper
-  def test_inexisting_context(context_name, description = nil, namespace: nil, ns: nil)
+  def test_inexisting_context(
+    context_name,
+    description = nil,
+    namespace: nil,
+    ns: nil
+  )
     namespace ||= ns
-    description ||= 'using in_context defined in a another context'
-    instance_exec do
-      in_context context_name, ns: namespace
+    description ||= "context '#{context_name}' should not be accessible here"
+    context_name_captured = context_name
+    namespace_captured = namespace
 
-      # If we get there the test has failed T_T
-      describe description do
-        it 'is well scoped' do
-          expect(false).to be_truthy
-        end
-      end
-    rescue RspecInContext::NoContextFound
-      describe description do
-        it 'is well scoped' do
-          expect(true).to be_truthy
-        end
+    describe description do
+      it "raises NoContextFound" do
+        expect do
+          # We need to call in_context at runtime, not at definition time
+          self.class.in_context(context_name_captured, ns: namespace_captured)
+        end.to raise_error(RspecInContext::NoContextFound)
       end
     end
   end

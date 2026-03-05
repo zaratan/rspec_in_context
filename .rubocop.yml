@@ -4,7 +4,7 @@ inherit_from:
 inherit_gem:
   prettier: rubocop.yml
 
-require: 
+plugins:
   - rubocop-performance
 
 AllCops:
@@ -27,15 +27,19 @@ Metrics/BlockLength:
 Lint/EmptyBlock:
   Enabled: false
 
-Style/GlobalVars:
-  Exclude:
-    - spec/rspec_in_context/in_context_spec.rb
+# Development dependencies in gemspec is a valid pattern for gems
+Gemspec/DevelopmentDependencies:
+  Enabled: false
 
 ### Prettier
 Style/OptionalBooleanParameter:
   Enabled: false
 
 Style/GuardClause:
+  Enabled: false
+
+# We legitimately reopen RSpec in multiple files and define separate helper modules
+Style/OneClassPerFile:
   Enabled: false
 
 ### End Prettier

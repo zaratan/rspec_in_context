@@ -6,6 +6,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-01-27
+### Breaking
+- **BREAKING** Minimum Ruby version is now 3.2
+- **BREAKING** `in_context` without namespace now raises `AmbiguousContextName` if the same context name exists in multiple namespaces. Specify the namespace explicitly to resolve.
+- Removed `codacy-coverage` dependency (incompatible with Ruby 4)
+
+### Added
+- Nested `in_context` with blocks now work correctly (uses a stack instead of a single thread-local variable)
+- Input validation: `define_context` raises `InvalidContextName` for nil/empty names and `MissingDefinitionBlock` when no block is given
+- `AmbiguousContextName` error when a context name exists in multiple namespaces and no namespace is specified
+
+### Changed
+- CI now tests Ruby 3.2, 3.3, 3.4, and head
+- GitHub Actions updated to v4 (checkout, setup-node)
+- Node updated to 20 in CI
+- Rubocop config uses `plugins` instead of deprecated `require`
+
+### Fixed
+- Thread-safety for nested `in_context` calls with blocks (previous implementation silently overwrote the outer block)
+- Non-deterministic context resolution when multiple namespaces contained the same context name
+- Tests no longer depend on execution order (random order enabled)
+- Removed all global variables from test suite
+
 ## [1.1.0.3] - 2021-01-13
 ### Added
 - Reformating code with Prettier-ruby
@@ -30,7 +53,10 @@ This is a release in order to test all type of actions
 - Changelog
 - Support ruby 3.0
 
-[Unreleased]: https://github.com/zaratan/rspec_in_context/compare/v1.1.0.1...HEAD
+[Unreleased]: https://github.com/zaratan/rspec_in_context/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/zaratan/rspec_in_context/compare/v1.1.0.3...v1.2.0
+[1.1.0.3]: https://github.com/zaratan/rspec_in_context/compare/v1.1.0.2...v1.1.0.3
+[1.1.0.2]: https://github.com/zaratan/rspec_in_context/compare/v1.1.0.1...v1.1.0.2
 [1.1.0.1]: https://github.com/zaratan/rspec_in_context/releases/tag/v1.1.0.1
 [1.1.0]: https://github.com/zaratan/rspec_in_context/releases/tag/v1.1.0
 [1.0.1.2]: https://github.com/zaratan/rspec_in_context/releases/tag/v1.0.1.2

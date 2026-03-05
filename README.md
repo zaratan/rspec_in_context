@@ -1,7 +1,6 @@
 # RspecInContext
 
 [![Gem Version](https://badge.fury.io/rb/rspec_in_context.svg)](https://badge.fury.io/rb/rspec_in_context)
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/6490834b08664dc898d0107c74a78357)](https://www.codacy.com/gh/zaratan/rspec_in_context/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=zaratan/rspec_in_context&amp;utm_campaign=Badge_Grade)
 ![Test and Release badge](https://github.com/zaratan/rspec_in_context/workflows/Test%20and%20Release/badge.svg)
 
 This gem is here to help you write better shared_examples in Rspec.
@@ -115,8 +114,10 @@ end
 
 * You can add variable instantiation relative to your test where you exactly want:
 
-`instanciate_context` is an alias of `execute_tests` so you can't use both.
-But it let you describe what the block will do better.
+`instantiate_context` is an alias of `execute_tests` so you can't use both.
+But it lets you describe what the block will do better.
+
+> **Note**: The old spelling `instanciate_context` still works but is deprecated and will emit a warning.
 
 #### Variable usage
 
@@ -198,18 +199,18 @@ Or
 RSpec.define_context "this is a namespaced context", ns: "namespace name"
 ```
 
-* When you want to use a namespaced in_context, you have two choice:
+* When you want to use a namespaced in_context, you have two choices:
 
-Ignore any namespace and it will try to find a corresponding in_context in any_namespace (the ones defined without namespace have the priority);
+Ignore any namespace and it will try to find a corresponding in_context in any namespace (the ones defined without namespace have the priority). **Note**: if the same context name exists in multiple namespaces, an `AmbiguousContextName` error will be raised — you must specify the namespace explicitly.
 ```ruby
 define_context "namespaced context", ns: "namespace name" do
   [...]
 end
 
-in_context "namespaced context"
+in_context "namespaced context" # Works if only one namespace has this name
 ```
 
-Pass a namespace and it will look only in this context.
+Pass a namespace and it will look only in this namespace.
 ```ruby
 define_context "namespaced context", ns: "namespace name" do
   [...]
@@ -267,6 +268,24 @@ RSpec.describe MyNiceClass do
 end
 ```
 Will print "MyNiceClass with my_var defined works" and "MyNiceClass without my_var defined doesn't work". Which is valid and readable documentation.
+
+## Migrating to 1.2.0
+
+### Breaking changes
+
+- **Ruby >= 3.2 required.** Older Rubies are no longer supported.
+- **`AmbiguousContextName` error.** If the same context name exists in multiple namespaces and you call `in_context` without specifying a namespace, `AmbiguousContextName` is now raised instead of silently picking one. Fix: add `ns:` to disambiguate.
+- **`ActiveSupport` removed.** The gem no longer depends on `activesupport`. This should be transparent, but if you were relying on `HashWithIndifferentAccess` behavior from the gem's internals, note that contexts are now stored in a plain `Hash` with string-normalized keys (symbols and strings still work interchangeably).
+
+### Deprecations
+
+- **`instanciate_context`** is deprecated (typo). Use `instantiate_context` or `execute_tests` instead. The old method still works but emits a warning to `$stderr`.
+
+### New features
+
+- **Input validation**: `define_context` now raises `InvalidContextName` (nil/empty name) and `MissingDefinitionBlock` (no block).
+- **`clear_all_contexts!`**: Call `RspecInContext::InContext.clear_all_contexts!` to free all stored contexts for memory cleanup in long-running suites.
+- **Thread-safety**: The context registry is now protected by a Mutex for `parallel_tests` in thread mode.
 
 ## Development
 

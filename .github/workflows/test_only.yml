@@ -2,18 +2,18 @@ name: Tests
 
 on:
   push:
-    branches-ignore: 
+    branches-ignore:
       - main
 
 jobs:
   tests:
     strategy:
       matrix:
-        ruby: [2.5, 2.6, 2.7, 3.0]
+        ruby: ['3.2', '3.3', '3.4', '4.0']
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
@@ -26,12 +26,17 @@ jobs:
   prettier:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Node
-      uses: actions/setup-node@v2
+    - uses: actions/checkout@v4
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
       with:
-        node-version: '14'
+        ruby-version: '3.4'
+        bundler-cache: true
+    - name: Set up Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
     - name: Install yarn dep
       run: yarn install
     - name: Check prettier
-      run: yarn prettier -c '**/*.rb' 
+      run: yarn prettier -c 'lib/**/*.rb' 'spec/**/*.rb' '*.gemspec' Gemfile
