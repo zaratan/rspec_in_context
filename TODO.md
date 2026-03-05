@@ -15,41 +15,14 @@ Issues identified during review of the codebase and PR #21.
 
 ## P1 — Réduction des dépendances
 
-### Retirer `active_support/all`
-
-`require "active_support/all"` charge la totalité d'ActiveSupport pour deux usages :
-- `HashWithIndifferentAccess` — remplaçable par un `Hash` classique avec `.to_s` sur les clés
-- `namespace&.present?` — remplaçable par `namespace && !namespace.to_s.strip.empty?`
-
-C'est une dépendance lourde pour une gem de test. La retirer réduirait significativement le temps de chargement.
-
-**Files**: `lib/rspec_in_context.rb`, `lib/rspec_in_context/in_context.rb`, `rspec_in_context.gemspec`
-
+- [x] Retirer `active_support/all` — remplacé `HashWithIndifferentAccess` par `Hash` avec `.to_s` sur les clés, retiré `present?`. Temps de boot des tests : 0.27s → 0.08s
 - [x] Retirer `faker` — retiré de `spec_helper.rb` et `rspec_in_context.gemspec`
 
 ## P1 — Robustesse face aux internals RSpec
 
-### Sécuriser `hooks.instance_variable_get(:@owner)`
-
-Accès direct à une variable d'instance privée de RSpec. Si elle disparaît dans une future version, `owner` sera `nil` et les contextes scopés ne seront jamais nettoyés (silencieusement).
-
-Ajouter un smoke test vérifiant que `@owner` n'est pas nil. Investiguer si `self` ou `self.class` pourrait servir de substitut.
-
-**File**: `lib/rspec_in_context/in_context.rb:191`
-
-### Sécuriser le prepend sur `RSpec::Core::ExampleGroup.subclass`
-
-La signature `subclass(parent, description, args, registration_collection, &)` mirror l'implémentation interne de RSpec. La contrainte `"> 3.0"` est trop large pour ce niveau de couplage.
-
-Restreindre à `"~> 3.0"` et ajouter un smoke test. Investiguer si un hook public RSpec (`after(:context)` ou similaire) pourrait remplacer le prepend.
-
-**Files**: `lib/rspec_in_context/context_management.rb`, `rspec_in_context.gemspec`
-
-### Resserrer les contraintes de version des dépendances
-
-`activesupport "> 2.0"` et `rspec "> 3.0"` n'ont pas de borne supérieure. Tant qu'ActiveSupport est une dépendance, utiliser `"~> 7.0"` (ou la version minimale réellement supportée). Utiliser `"~> 3.0"` pour rspec. Mettre à jour rake vers `"~> 13.0"`.
-
-**File**: `rspec_in_context.gemspec`
+- [x] Smoke test pour `hooks.instance_variable_get(:@owner)` — vérifie que `@owner` est non-nil et est une Class
+- [x] Smoke test pour le prepend de `ContextManagement` sur `ExampleGroup.subclass`
+- [x] Resserrer les contraintes de version — `rspec "~> 3.0"`, `rake "~> 13.0"`, `activesupport` retiré
 
 ## P2 — Qualité de l'API
 

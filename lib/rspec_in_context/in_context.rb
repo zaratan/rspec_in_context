@@ -42,12 +42,10 @@ module RspecInContext
       end
 
       # Contexts container + creation
+      # Keys are normalized to strings so symbols and strings are interchangeable.
       # @api private
       def contexts
-        @contexts ||=
-          HashWithIndifferentAccess.new do |hash, key|
-            hash[key] = HashWithIndifferentAccess.new
-          end
+        @contexts ||= Hash.new { |hash, key| hash[key.to_s] = {} }
       end
 
       # Meta method to add a new context
@@ -72,10 +70,12 @@ module RspecInContext
         end
 
         namespace ||= GLOBAL_CONTEXT
-        if contexts.dig(namespace, context_name)
+        ns_key = namespace.to_s
+        name_key = context_name.to_s
+        if contexts.dig(ns_key, name_key)
           warn("Overriding an existing context: #{context_name}@#{namespace}")
         end
-        contexts[namespace][context_name] = Context.new(
+        contexts[ns_key][name_key] = Context.new(
           block,
           owner,
           context_name,
@@ -89,11 +89,12 @@ module RspecInContext
       # @raise [NoContextFound] if no context is found
       # @raise [AmbiguousContextName] if multiple namespaces contain the same context name
       def find_context(context_name, namespace = nil)
+        name_key = context_name.to_s
         result =
           if namespace && !namespace.to_s.empty?
-            contexts.dig(namespace, context_name)
+            contexts.dig(namespace.to_s, name_key)
           else
-            find_context_across_all_namespaces(context_name)
+            find_context_across_all_namespaces(name_key)
           end
         result ||
           (raise NoContextFound, "No context found with name #{context_name}")
@@ -103,18 +104,18 @@ module RspecInContext
       # Uses dig to avoid auto-vivifying empty namespace entries
       # @api private
       # @raise [AmbiguousContextName] if multiple namespaces contain the same context name
-      def find_context_across_all_namespaces(context_name)
+      def find_context_across_all_namespaces(name_key)
         matching_namespaces =
           contexts.select do |_, namespaced_contexts|
-            namespaced_contexts[context_name]
+            namespaced_contexts[name_key]
           end
         if matching_namespaces.size > 1
           namespace_names = matching_namespaces.keys.join(", ")
           raise AmbiguousContextName,
-                "Context '#{context_name}' exists in multiple namespaces (#{namespace_names}). " \
+                "Context '#{name_key}' exists in multiple namespaces (#{namespace_names}). " \
                   "Please specify a namespace."
         end
-        matching_namespaces.values.first&.[](context_name)
+        matching_namespaces.values.first&.[](name_key)
       end
 
       # @api private

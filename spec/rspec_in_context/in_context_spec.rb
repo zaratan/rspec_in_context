@@ -130,7 +130,7 @@ describe RspecInContext::InContext do
         /Overriding an existing context: #{unique_name}/,
       )
     ensure
-      RspecInContext::InContext.contexts[:global_context]&.delete(unique_name)
+      RspecInContext::InContext.contexts["global_context"]&.delete(unique_name)
     end
   end
 
@@ -174,8 +174,8 @@ describe RspecInContext::InContext do
         /exists in multiple namespaces/,
       )
     ensure
-      RspecInContext::InContext.contexts[ns_a]&.delete(unique_name)
-      RspecInContext::InContext.contexts[ns_b]&.delete(unique_name)
+      RspecInContext::InContext.contexts[ns_a.to_s]&.delete(unique_name)
+      RspecInContext::InContext.contexts[ns_b.to_s]&.delete(unique_name)
     end
   end
 
@@ -411,5 +411,23 @@ describe RspecInContext::InContext do
     end
     test_inexisting_context "isolated namespaced"
     test_inexisting_context "isolated namespaced", ns: :isolated
+  end
+
+  describe "RSpec internals smoke tests" do
+    # These tests verify that private RSpec APIs we depend on still exist.
+    # If they break, context scoping will silently stop working.
+
+    # hooks is only available at describe level, capture it here
+    hooks_owner = hooks.instance_variable_get(:@owner)
+
+    it "hooks exposes @owner for context scoping" do
+      expect(hooks_owner).not_to be_nil
+      expect(hooks_owner).to be_a(Class)
+    end
+
+    it "ExampleGroup.subclass is prepended with ContextManagement" do
+      ancestors = RSpec::Core::ExampleGroup.singleton_class.ancestors
+      expect(ancestors).to include(RspecInContext::ContextManagement)
+    end
   end
 end

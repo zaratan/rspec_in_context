@@ -27,8 +27,7 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = ">= 3.2.0"
   spec.license = "MIT"
 
-  spec.add_dependency "activesupport", "> 2.0"
-  spec.add_dependency "rspec", "> 3.0"
+  spec.add_dependency "rspec", "~> 3.0"
 
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "bundler-audit", "> 0.6.0"
@@ -36,7 +35,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "guard-rspec", "> 4.7"
   spec.add_development_dependency "overcommit", "> 0.46"
   spec.add_development_dependency "prettier"
-  spec.add_development_dependency "rake", "~> 12.0"
+  spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "rspec_junit_formatter", "~> 0.4.1"
   spec.add_development_dependency "rubocop", "> 0.58"
   spec.add_development_dependency "rubocop-performance"
