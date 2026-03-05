@@ -72,7 +72,7 @@ module RspecInContext
         end
 
         namespace ||= GLOBAL_CONTEXT
-        if contexts[namespace][context_name]
+        if contexts.dig(namespace, context_name)
           warn("Overriding an existing context: #{context_name}@#{namespace}")
         end
         contexts[namespace][context_name] = Context.new(
@@ -86,20 +86,24 @@ module RspecInContext
 
       # Find a context.
       # @api private
+      # @raise [NoContextFound] if no context is found
+      # @raise [AmbiguousContextName] if multiple namespaces contain the same context name
       def find_context(context_name, namespace = nil)
-        if namespace&.present?
-          contexts[namespace][context_name]
-        else
-          contexts[GLOBAL_CONTEXT][context_name] ||
-            find_context_in_any_namespace(context_name)
-        end ||
+        result =
+          if namespace && !namespace.to_s.empty?
+            contexts.dig(namespace, context_name)
+          else
+            find_context_across_all_namespaces(context_name)
+          end
+        result ||
           (raise NoContextFound, "No context found with name #{context_name}")
       end
 
       # Look into every namespace to find the context
+      # Uses dig to avoid auto-vivifying empty namespace entries
       # @api private
       # @raise [AmbiguousContextName] if multiple namespaces contain the same context name
-      def find_context_in_any_namespace(context_name)
+      def find_context_across_all_namespaces(context_name)
         matching_namespaces =
           contexts.select do |_, namespaced_contexts|
             namespaced_contexts[context_name]

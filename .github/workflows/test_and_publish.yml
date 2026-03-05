@@ -60,4 +60,4 @@ jobs:
     - name: Fetch tags from remote
       run: "git fetch -t"
     - name: Publish if version change
-      run: 'git diff `git tag | tail -1` -- lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" && rake release || echo "No release for now"'
+      run: 'git diff $(git tag --sort=-v:refname | head -1) -- lib/rspec_in_context/version.rb | grep -E "^\+.*VERSION" && rake release || echo "No release for now"'

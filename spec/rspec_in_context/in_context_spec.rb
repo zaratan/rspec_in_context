@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "securerandom"
+
 RSpec.define_context "outside in_context" do
   it "works for outside context" do
     expect(true).to be_truthy
@@ -111,7 +113,7 @@ describe RspecInContext::InContext do
 
   describe "overriding an existing context" do
     it "warns when redefining a context" do
-      unique_name = "context_override_test_#{rand(100_000)}"
+      unique_name = "context_override_test_#{SecureRandom.hex(8)}"
       warnings = []
       allow(RspecInContext::InContext).to receive(:warn) { |msg|
         warnings << msg
@@ -127,6 +129,8 @@ describe RspecInContext::InContext do
       expect(warnings.first).to match(
         /Overriding an existing context: #{unique_name}/,
       )
+    ensure
+      RspecInContext::InContext.contexts[:global_context]&.delete(unique_name)
     end
   end
 
@@ -153,21 +157,25 @@ describe RspecInContext::InContext do
     end
 
     it "raises AmbiguousContextName when same name exists in multiple namespaces" do
-      unique_name = "ambiguous_context_#{rand(100_000)}"
-      RSpec.define_context(unique_name, ns: :namespace_a) do
+      unique_name = "ambiguous_context_#{SecureRandom.hex(8)}"
+      ns_a = :"namespace_a_#{SecureRandom.hex(4)}"
+      ns_b = :"namespace_b_#{SecureRandom.hex(4)}"
+      RSpec.define_context(unique_name, ns: ns_a) do
         it("works") { expect(true).to be_truthy }
       end
-      RSpec.define_context(unique_name, ns: :namespace_b) do
+      RSpec.define_context(unique_name, ns: ns_b) do
         it("works") { expect(true).to be_truthy }
       end
 
-      # in_context calls find_context internally, so we test find_context directly
       expect {
         RspecInContext::InContext.find_context(unique_name)
       }.to raise_error(
         RspecInContext::AmbiguousContextName,
         /exists in multiple namespaces/,
       )
+    ensure
+      RspecInContext::InContext.contexts[ns_a]&.delete(unique_name)
+      RspecInContext::InContext.contexts[ns_b]&.delete(unique_name)
     end
   end
 
@@ -270,6 +278,35 @@ describe RspecInContext::InContext do
 
         it "still has access to outer_var after inner context" do
           expect(outer_var).to eq(:outer_value)
+        end
+      end
+    end
+
+    # This test proves the stack is necessary: a define_context that calls
+    # in_context (which pushes/pops) and then execute_tests (which needs
+    # the *outer* block). Without a stack, the inner in_context would
+    # clobber the outer block and execute_tests would get nil.
+    define_context "context with in_context then execute_tests" do
+      in_context "inner with execute" do
+        it "inner block was injected" do
+          expect(inner_var).to eq(:inner_value)
+        end
+      end
+
+      context "after inner in_context" do
+        execute_tests
+      end
+    end
+
+    describe "stack correctness: in_context before execute_tests in same define_context" do
+      in_context "context with in_context then execute_tests" do
+        # This let is injected via execute_tests above.
+        # If the stack is broken, execute_tests gets nil and this it block
+        # is never registered — the global example count guard catches that.
+        let(:proof_of_injection) { :injected }
+
+        it "outer block was actually injected by execute_tests" do
+          expect(proof_of_injection).to eq(:injected)
         end
       end
     end

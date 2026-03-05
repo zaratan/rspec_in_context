@@ -116,4 +116,33 @@ RSpec.configure do |config|
   #   Kernel.srand config.seed
   config.include RspecInContext
   config.extend ContextTestHelper
+
+  # Block delivery guard: detect in_context calls that silently fail to
+  # inject their content. See spec/support/block_delivery_guard.rb for details.
+  config.after(:suite) do
+    next if BlockDeliveryGuard.failures.empty?
+
+    grouped = BlockDeliveryGuard.failures.group_by { |f| f[:type] }
+
+    labels = {
+      no_group_created: "in_context calls that created no ExampleGroup (in_context broken):",
+      empty_group: "in_context calls that produced zero examples (context block not injected):",
+      block_not_consumed: "in_context blocks never consumed by execute_tests:",
+    }
+    messages = []
+    labels.each do |type, label|
+      next unless grouped[type]
+
+      messages << label
+      grouped[type].each do |entry|
+        messages << "  - in_context \"#{entry[:context]}\" at #{entry[:location]}"
+      end
+    end
+
+    $stderr.puts("\n\nBLOCK DELIVERY GUARD:\n#{messages.join("\n")}\n\n")
+    exit(1)
+  end
 end
+
+# Activate the block delivery guard (see spec/support/block_delivery_guard.rb).
+RspecInContext::InContext::ClassMethods.prepend(InContextDeliveryCheck)
