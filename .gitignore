@@ -12,6 +12,10 @@ vendor/cache
 
 # Rubocop remote config cache
 .rubocop-remote-*.yml
+.rubocop-http---*
+
+# Yarn / prettier-ruby
+node_modules/
 
 # Claude Code
 CLAUDE.md

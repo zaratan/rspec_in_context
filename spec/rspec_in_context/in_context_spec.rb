@@ -454,6 +454,39 @@ describe RspecInContext::InContext do
     end
   end
 
+  describe "thread-safety" do
+    # Concurrently calling `add_context` from multiple threads should not
+    # lose writes nor raise from unsynchronized access to @contexts. The
+    # Mutex around the registry is what keeps this safe under parallel_tests
+    # in thread mode.
+    it "registers concurrent contexts from multiple threads without loss" do
+      original = RspecInContext::InContext.contexts
+      saved = Hash.new { |hash, key| hash[key.to_s] = {} }
+      original.each { |k, v| saved[k] = v.dup }
+
+      namespace = "threadsafety_#{SecureRandom.hex(4)}"
+      threads_count = 16
+      per_thread = 25
+
+      threads =
+        Array.new(threads_count) do |t|
+          Thread.new do
+            per_thread.times do |i|
+              RSpec.define_context("ctx_#{t}_#{i}", ns: namespace) do
+                it("works") { expect(true).to be_truthy }
+              end
+            end
+          end
+        end
+      threads.each(&:join)
+
+      registered = RspecInContext::InContext.contexts[namespace.to_s].keys.size
+      expect(registered).to eq(threads_count * per_thread)
+    ensure
+      RspecInContext::InContext.instance_variable_set(:@contexts, saved)
+    end
+  end
+
   describe "RSpec internals smoke tests" do
     # These tests verify that private RSpec APIs we depend on still exist.
     # If they break, context scoping will silently stop working.

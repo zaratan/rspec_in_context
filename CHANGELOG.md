@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `CONTRIBUTING.md` documenting the dev setup, check commands, PR expectations
+  and release process.
+- Thread-safety spec that concurrently registers contexts from multiple
+  threads, guarding against regressions of the mutex-protected registry.
+
+### Changed
+
+- Inline comment in `in_context` explaining the purpose of the
+  `Thread.current[:test_block_stack]` push/pop dance (nested block delivery,
+  thread-local isolation under `parallel_tests`).
+
+### Removed
+
+- `TODO.md` — stale review artefact; all items were resolved. Future work will
+  live in GitHub issues.
+
 ## [1.2.2] - 2026-04-21
 
 ### Changed

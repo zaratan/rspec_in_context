@@ -157,6 +157,13 @@ module RspecInContext
       def in_context(context_name, *args, namespace: nil, ns: nil, &block)
         namespace ||= ns
         context_to_exec = InContext.find_context(context_name, namespace)
+        # A thread-local *stack* is used (rather than a single slot) so that
+        # nested `in_context` calls can each deliver their own block to the
+        # matching `execute_tests` without clobbering the outer caller.
+        # Each `in_context` pushes its block; `execute_tests` peeks the top;
+        # the `ensure` below pops it so the stack unwinds with the call tree.
+        # Using `Thread.current` (rather than a plain ivar) keeps this safe
+        # under parallel_tests in thread mode.
         Thread.current[:test_block_stack] ||= []
         Thread.current[:test_block_stack].push(block)
         begin
