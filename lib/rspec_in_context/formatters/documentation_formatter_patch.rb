@@ -14,7 +14,8 @@ module RspecInContext
         # RSpec metadata inherits to children, but notification.group.description
         # returns the group's OWN description (not the inherited/concatenated one).
         # So named sub-contexts (non-empty description) pass through to super normally.
-        if group.metadata[:rspec_in_context_silent] == true && group.description.strip.empty?
+        if group.metadata[:rspec_in_context_silent] == true &&
+             group.description.strip.empty?
           return
         end
 
@@ -23,7 +24,8 @@ module RspecInContext
 
       def example_group_finished(notification)
         group = notification.group
-        if group.metadata[:rspec_in_context_silent] == true && group.description.strip.empty?
+        if group.metadata[:rspec_in_context_silent] == true &&
+             group.description.strip.empty?
           return
         end
 

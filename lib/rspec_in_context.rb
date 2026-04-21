@@ -5,7 +5,7 @@ require "rspec_in_context/formatters/documentation_formatter_patch"
 
 if defined?(RSpec::Core::Formatters::DocumentationFormatter)
   RSpec::Core::Formatters::DocumentationFormatter.prepend(
-    RspecInContext::Formatters::DocumentationFormatterPatch
+    RspecInContext::Formatters::DocumentationFormatterPatch,
   )
 end
 

@@ -3,18 +3,25 @@ require "tempfile"
 
 RSpec.describe RspecInContext::Formatters::DocumentationFormatterPatch do
   def run_spec_with_documentation_formatter(spec_content)
-    Tempfile.create(["formatter_test", ".rb"]) do |f|
+    Tempfile.create(%w[formatter_test .rb]) do |f|
       f.write(spec_content)
       f.flush
 
-      stdout, stderr, status = Open3.capture3(
-        { "DISABLE_SIMPLECOV" => "1" },
-        "bundle", "exec", "rspec", f.path,
-        "--format", "documentation",
-        "--order", "defined",
-        "--no-color",
-        "--options", File::NULL
-      )
+      stdout, stderr, status =
+        Open3.capture3(
+          { "DISABLE_SIMPLECOV" => "1" },
+          "bundle",
+          "exec",
+          "rspec",
+          f.path,
+          "--format",
+          "documentation",
+          "--order",
+          "defined",
+          "--no-color",
+          "--options",
+          File::NULL,
+        )
       [stdout, stderr, status]
     end
   end
@@ -39,7 +46,8 @@ RSpec.describe RspecInContext::Formatters::DocumentationFormatterPatch do
         end
       RUBY
 
-      stdout, _stderr, status = run_spec_with_documentation_formatter(spec_content)
+      stdout, _stderr, status =
+        run_spec_with_documentation_formatter(spec_content)
       expect(status.success?).to be(true), "Spec failed: #{stdout}"
 
       lines = stdout.lines.map(&:rstrip)
@@ -48,7 +56,8 @@ RSpec.describe RspecInContext::Formatters::DocumentationFormatterPatch do
       expect(describe_idx).not_to be_nil
 
       # The example should be directly under the describe, indented by 2 spaces (not 4)
-      example_line = lines.find { |l| l.include?("works inside silent context") }
+      example_line =
+        lines.find { |l| l.include?("works inside silent context") }
       expect(example_line).not_to be_nil
       expect(example_line).to match(/^  works inside silent context/)
 
@@ -79,12 +88,15 @@ RSpec.describe RspecInContext::Formatters::DocumentationFormatterPatch do
         end
       RUBY
 
-      stdout, _stderr, status = run_spec_with_documentation_formatter(spec_content)
+      stdout, _stderr, status =
+        run_spec_with_documentation_formatter(spec_content)
       expect(status.success?).to be(true), "Spec failed: #{stdout}"
 
       lines = stdout.lines.map(&:rstrip)
       expect(lines.any? { |l| l.include?("visible context") }).to be(true)
-      expect(lines.any? { |l| l.include?("works inside non-silent context") }).to be(true)
+      expect(
+        lines.any? { |l| l.include?("works inside non-silent context") },
+      ).to be(true)
     end
   end
 
@@ -110,12 +122,15 @@ RSpec.describe RspecInContext::Formatters::DocumentationFormatterPatch do
         end
       RUBY
 
-      stdout, _stderr, status = run_spec_with_documentation_formatter(spec_content)
+      stdout, _stderr, status =
+        run_spec_with_documentation_formatter(spec_content)
       expect(status.success?).to be(true), "Spec failed: #{stdout}"
 
       lines = stdout.lines.map(&:rstrip)
       expect(lines.any? { |l| l.include?("when nested") }).to be(true)
-      expect(lines.any? { |l| l.include?("shows nested context name") }).to be(true)
+      expect(lines.any? { |l| l.include?("shows nested context name") }).to be(
+        true,
+      )
     end
   end
 
@@ -143,7 +158,8 @@ RSpec.describe RspecInContext::Formatters::DocumentationFormatterPatch do
         end
       RUBY
 
-      stdout, _stderr, status = run_spec_with_documentation_formatter(spec_content)
+      stdout, _stderr, status =
+        run_spec_with_documentation_formatter(spec_content)
       expect(status.success?).to be(true), "Spec failed: #{stdout}"
 
       lines = stdout.lines.map(&:rstrip)
@@ -178,7 +194,8 @@ RSpec.describe RspecInContext::Formatters::DocumentationFormatterPatch do
         end
       RUBY
 
-      stdout, _stderr, status = run_spec_with_documentation_formatter(spec_content)
+      stdout, _stderr, status =
+        run_spec_with_documentation_formatter(spec_content)
       expect(status.success?).to be(true), "Spec failed: #{stdout}"
 
       lines = stdout.lines.map(&:rstrip)
@@ -192,26 +209,32 @@ RSpec.describe RspecInContext::Formatters::DocumentationFormatterPatch do
   describe "patch module structure" do
     it "is prepended on DocumentationFormatter" do
       expect(
-        RSpec::Core::Formatters::DocumentationFormatter.ancestors
+        RSpec::Core::Formatters::DocumentationFormatter.ancestors,
       ).to include(RspecInContext::Formatters::DocumentationFormatterPatch)
     end
   end
 
   describe "unit tests for patch methods" do
     let(:output) { StringIO.new }
-    let(:formatter) { RSpec::Core::Formatters::DocumentationFormatter.new(output) }
+    let(:formatter) do
+      RSpec::Core::Formatters::DocumentationFormatter.new(output)
+    end
 
     def notification_for(description: "", metadata: {})
-      group = double("ExampleGroup", description: description, metadata: metadata)
+      group =
+        double("ExampleGroup", description: description, metadata: metadata)
       double("GroupNotification", group: group)
     end
 
     describe "#example_group_started" do
       it "skips silent contexts with empty description" do
-        notification = notification_for(
-          description: "",
-          metadata: { rspec_in_context_silent: true }
-        )
+        notification =
+          notification_for(
+            description: "",
+            metadata: {
+              rspec_in_context_silent: true,
+            },
+          )
         formatter.example_group_started(notification)
         expect(output.string).to eq("")
       end
@@ -223,10 +246,13 @@ RSpec.describe RspecInContext::Formatters::DocumentationFormatterPatch do
       end
 
       it "does not skip groups with metadata but non-empty description" do
-        notification = notification_for(
-          description: "some context",
-          metadata: { rspec_in_context_silent: true }
-        )
+        notification =
+          notification_for(
+            description: "some context",
+            metadata: {
+              rspec_in_context_silent: true,
+            },
+          )
         formatter.example_group_started(notification)
         expect(output.string).to include("some context")
       end
@@ -234,15 +260,16 @@ RSpec.describe RspecInContext::Formatters::DocumentationFormatterPatch do
 
     describe "#example_group_finished" do
       it "skips silent contexts with empty description" do
-        notification = notification_for(
-          description: "",
-          metadata: { rspec_in_context_silent: true }
-        )
+        notification =
+          notification_for(
+            description: "",
+            metadata: {
+              rspec_in_context_silent: true,
+            },
+          )
         # Start a non-silent group first to have @group_level > 0
-        normal_notification = notification_for(
-          description: "normal",
-          metadata: {}
-        )
+        normal_notification =
+          notification_for(description: "normal", metadata: {})
         formatter.example_group_started(normal_notification)
         level_before = formatter.instance_variable_get(:@group_level)
 
