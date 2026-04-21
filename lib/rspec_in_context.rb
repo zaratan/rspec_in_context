@@ -1,6 +1,13 @@
 require "rspec_in_context/version"
 require "rspec_in_context/in_context"
 require "rspec_in_context/context_management"
+require "rspec_in_context/formatters/documentation_formatter_patch"
+
+if defined?(RSpec::Core::Formatters::DocumentationFormatter)
+  RSpec::Core::Formatters::DocumentationFormatter.prepend(
+    RspecInContext::Formatters::DocumentationFormatterPatch
+  )
+end
 
 # Main wrapping module
 module RspecInContext

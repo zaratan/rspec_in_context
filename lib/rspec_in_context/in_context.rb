@@ -161,7 +161,7 @@ module RspecInContext
         Thread.current[:test_block_stack].push(block)
         begin
           if context_to_exec.silent
-            context { instance_exec(*args, &context_to_exec.block) }
+            context("", rspec_in_context_silent: true) { instance_exec(*args, &context_to_exec.block) }
           else
             context(
               context_name.to_s,
